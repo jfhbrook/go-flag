@@ -10,22 +10,23 @@ import sys
 from typing import Callable, cast, Dict, IO, List, Optional, Tuple, Type, TypeVar
 
 from go_ports.error import GoError
+from go_ports.fmt import errorf
 from go_ports.ptr import Ptr
-import go_ports.internal.strconv as strconv
+import go_ports.strconv as strconv
 import go_ports.time as time
 
 # HelpError is the error class raised if the -help or -h flag is invoked
 # but no such flag is defined.
-HelpError = GoError.cls("flag: help requested")
+HelpError = GoError.from_string("flag: help requested")
 
 # ParseError is raised by set if a flag's value fails to parse, such as with
 # an invalid integer for int. It then gets wrapped through failf to provide
 # more information.
-ParseError = GoError.cls("parse error")
+ParseError = GoError.from_string("parse error")
 
 # RangeError is raised by set if a flag's value is out of range. It then gets
 # wrapped through failf to provide more information.
-RangeError = GoError.cls("value out of range")
+RangeError = GoError.from_string("value out of range")
 
 OK = bool
 
@@ -49,10 +50,6 @@ class Value[V](ABC):
         self.value: Ptr = p
 
     @abstractmethod
-    def string(self) -> str:
-        pass
-
-    @abstractmethod
     def get(self) -> V:
         pass
 
@@ -73,7 +70,7 @@ class BoolValue(Value[bool]):
     def get(self) -> bool:
         return cast(bool, self.value.deref())
 
-    def string(self) -> str:
+    def __str__(self) -> str:
         return strconv.format_bool(self.get())
 
 
@@ -89,7 +86,7 @@ class IntValue(Value[int]):
     def get(self) -> int:
         return cast(int, self.value.deref())
 
-    def string(self) -> str:
+    def __str__(self) -> str:
         return strconv.itoa(self.get())
 
 
@@ -100,7 +97,7 @@ class StringValue(Value[str]):
     def get(self) -> str:
         return cast(str, self.value.deref())
 
-    def string(self) -> str:
+    def __str__(self) -> str:
         return self.get()
 
 
@@ -112,7 +109,7 @@ class FloatValue(Value[float]):
     def get(self) -> float:
         return cast(float, self.value.deref())
 
-    def string(self) -> str:
+    def __str__(self) -> str:
         return strconv.format_float(self.get(), "g", -1, 64)
 
 
@@ -124,8 +121,8 @@ class DurationValue(Value[time.Duration]):
     def get(self) -> time.Duration:
         return cast(time.Duration, self.value.deref())
 
-    def string(self) -> str:
-        return self.get().string()
+    def __str__(self) -> str:
+        return str(self.value.deref())
 
 
 class FuncValue(Value[Func]):
@@ -135,7 +132,7 @@ class FuncValue(Value[Func]):
     def get(self) -> Func:
         return cast(Func, self.value.deref())
 
-    def string(self) -> str:
+    def __str__(self) -> str:
         return ""
 
 
@@ -211,7 +208,7 @@ class FlagSet:
             info = inspect.stack()[0]
             self._undef[name] = f"{info.filename}:{info.lineno}"
 
-            raise FlagError(f"No such flag -{name}")
+            raise errorf(f"No such flag -{name}")
         else:
             flag.value.set(value)
             self._actual[name] = flag
