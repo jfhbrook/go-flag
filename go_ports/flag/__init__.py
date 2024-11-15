@@ -9,54 +9,36 @@ import inspect
 import sys
 from typing import Callable, cast, Dict, IO, List, Optional, Tuple, Type, TypeVar
 
-from flag.exceptions import FlagError, FlagParseError, FlagRangeError, FlagSyntaxError
+from go_ports.error import GoError
+from go_ports.ptr import Ptr
 import go_ports.internal.strconv as strconv
 import go_ports.time as time
 
+# HelpError is the error class raised if the -help or -h flag is invoked
+# but no such flag is defined.
+HelpError = GoError.cls("flag: help requested")
 
-class Ptr:
-    """
-    Go has pointers, Python does not. Go's flag package depends heavily on
-    pointers, so we use this class to simulate them where needed.
-    """
-    current: int = 0
-    values: Dict[int, object] = {}
+# ParseError is raised by set if a flag's value fails to parse, such as with
+# an invalid integer for int. It then gets wrapped through failf to provide
+# more information.
+ParseError = GoError.cls("parse error")
 
-    def __init__(self, value: object) -> None:
-        self.values[self.current] = value
-
-        self.address: int = self.current
-
-        self.current += 1
-
-    def set(self, value: object) -> None:
-        self.values[self.address] = value
-
-    def deref(self) -> object:
-        return self.values[self.address]
-
-    def __del__(self) -> None:
-        del self.values[self.address]
-
-
-class HelpException(Exception):
-    """
-    An exception raised if the -help or -h flag is invoked but no such flag is
-    defined.
-    """
-    pass
-
+# RangeError is raised by set if a flag's value is out of range. It then gets
+# wrapped through failf to provide more information.
+RangeError = GoError.cls("value out of range")
 
 OK = bool
 
 
-def num_error(exc: Exception) -> FlagError:
-    if isinstance(exc, FlagSyntaxError):
-        raise FlagParseError() from exc
+def num_error(exc: Exception) -> GoError:
+    if isinstance(exc, strconv.SyntaxError):
+        raise ParseError() from exc
     raise exc
+
 
 Func = Callable[[str]]
 ValueType = bool | int | str | float | time.Duration | Func
+
 
 class Value[V](ABC):
     value: Ptr
@@ -131,7 +113,7 @@ class FloatValue(Value[float]):
         return cast(float, self.value.deref())
 
     def string(self) -> str:
-        return strconv.format_float(self.get(), 'g', -1, 64)
+        return strconv.format_float(self.get(), "g", -1, 64)
 
 
 class DurationValue(Value[time.Duration]):
@@ -224,7 +206,7 @@ class FlagSet:
             # This is a problem which occurs if both the definition
             # and the set call are in init code and for whatever
             # reason the init code changes evaluation order.
-            
+
             # TODO: This index is probably wrong
             info = inspect.stack()[0]
             self._undef[name] = f"{info.filename}:{info.lineno}"
@@ -256,9 +238,9 @@ class FlagSet:
         for i, u in enumerate(usage):
             if u == "`":
                 for j in range(i + 1, len(usage)):
-                    if usage[j] == '`':
-                        name = usage[i+1:j]
-                        usage = usage[:i] + name + usage[j+1]
+                    if usage[j] == "`":
+                        name = usage[i + 1 : j]
+                        usage = usage[:i] + name + usage[j + 1]
                         return (name, usage)
                 break
         name = "value"
@@ -275,7 +257,7 @@ class FlagSet:
             name = "int"
         elif isinstance(fv, StringValue):
             name = "string"
-        
+
         return (name, usage)
 
     def print_defaults(self) -> None:
@@ -330,7 +312,7 @@ def set_(name: str, value: str) -> None:
     command_line.set(name, value)
 
 
-B = TypeVar('B', bound = BaseValue)
+B = TypeVar("B", bound=BaseValue)
 
 
 @dataclass
@@ -347,7 +329,7 @@ class Flag[B]:
 
 def sort_flags(flags: Dict[str, Flag]) -> List[Flag]:
     result: List[Flag] = list(flags.values())
-    result.sort(key = lambda f: f.name)
+    result.sort(key=lambda f: f.name)
     return result
 
 
@@ -360,8 +342,11 @@ def usage():
     to command_line's output, which by default is sys.stderr.
     """
 
-    print(f"""Usage of {sys.argv[0]}:
-{print_defaults()}""", file=command_line.output)
+    print(
+        f"""Usage of {sys.argv[0]}:
+{print_defaults()}""",
+        file=command_line.output,
+    )
 
 
 def arg(i: int) -> Optional[str]:
@@ -408,11 +393,12 @@ def timedelta(name: str, value: time.Duration, usage: str) -> time.Duration:
 
 
 def float_(name: str, value: float, usage: str) -> float:
-   """
-   Defines a float flag with the specified name, default value, and usage
-   string. The return value is the value of the flag.
-   """
-   return 1.2
+    """
+    Defines a float flag with the specified name, default value, and usage
+    string. The return value is the value of the flag.
+    """
+    return 1.2
+
 
 def func(name: str, usage: str, fn: Callable[[str]]) -> None:
     """
@@ -420,6 +406,7 @@ def func(name: str, usage: str, fn: Callable[[str]]) -> None:
     flag is seen, fn is called with the value of the flag. If fn raises
     an exception, it will be treated as a flag value parsing error.
     """
+
 
 def int_(name: str, value: int, usage: str) -> int:
     """
@@ -433,10 +420,12 @@ def n_arg() -> int:
     The number of arguments remaining after flags have been processed.
     """
 
+
 def n_flag() -> int:
     """
     Returns the number of command-line flags that have been set.
     """
+
 
 def parse() -> bool:
     """
@@ -449,6 +438,7 @@ def parsed() -> bool:
     """
     Whether the command-line flags have been parsed.
     """
+
 
 def print_defaults():
     """
@@ -464,6 +454,7 @@ def string(name: str, value: str, usage: str) -> str:
     string. The return value is the value of the flag.
     """
 
+
 def unquote_usage(flag: Flag) -> Tuple[str, str]:
     """
     Extracts a back-quoted name from the usage string for a flag and returns
@@ -477,4 +468,3 @@ def var(value: Type[Value], name: str, usage: str) -> None:
     of the flag are represented by the first argument, of type Value, which
     typically holds a user-defined implementation of Value.
     """
-

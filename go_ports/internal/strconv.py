@@ -1,6 +1,9 @@
 import datetime
 
-from flag.exceptions import FlagRangeError, FlagSyntaxError
+from go_ports.error import GoError
+
+RangeError = GoError.cls("value out of range")
+SyntaxError = GoError.cls("invalid syntax")
 
 
 def parse_bool(string: str) -> bool:
@@ -9,13 +12,13 @@ def parse_bool(string: str) -> bool:
     elif string in {"0", "f", "F", "FALSE", "false", "False"}:
         return False
 
-    raise FlagSyntaxError()
+    raise SyntaxError()
 
 
 def format_bool(b: bool) -> str:
     if b:
-        return 'true'
-    return 'false'
+        return "true"
+    return "false"
 
 
 def parse_int(s: str, base: int, bit_size: int) -> int:

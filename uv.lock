@@ -2,6 +2,6 @@ version = 1
 requires-python = ">=3.12"
 
 [[package]]
-name = "go-flag"
+name = "go-ports"
 version = "0.1.0"
 source = { virtual = "." }
