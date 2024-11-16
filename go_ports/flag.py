@@ -380,7 +380,7 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     """
 
     if isinstance(flag.value, BoolValue):
-        return value == "False"
+        return value == "false"
     elif isinstance(flag.value, IntValue):
         return value == "0"
     elif isinstance(flag.value, FloatValue):
@@ -416,6 +416,7 @@ def unquote_usage(flag: "Flag") -> Tuple[str, str]:
 
     fv: Value = flag.value
     if isinstance(fv, BoolValue):
+        # TODO: when would this be false?
         if fv.is_bool_flag:
             name = ""
     elif isinstance(fv, DurationValue):
@@ -430,7 +431,7 @@ def unquote_usage(flag: "Flag") -> Tuple[str, str]:
     return (name, usage)
 
 
-def print_defaults():
+def print_defaults() -> None:
     """
     Prints, to standard error unless configured otherwise, a usage message
     showing the default settings of all defined command-line flags.
@@ -442,7 +443,7 @@ def print_defaults():
 
 # NOTE: usage is not just command_line.default_usage() because it serves
 # as the example for how to write your own usage function.
-def usage():
+def usage() -> None:
     """
     Prints a usage message documenting all defined command-line flags
     to command_line's output, which by default is sys.stderr.
