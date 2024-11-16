@@ -3,7 +3,7 @@ from typing import List
 from flag.error import *
 from flag.flag import *
 from flag.panic import *
-from flag.ptr import *
+from flag.pointer import *
 from flag.time import *
 
 init()
@@ -46,7 +46,10 @@ __all__: List[str] = [
     "init",
     # flag.panic
     "Panic",
-    # flag.ptr
+    # flag.pointer
+    "AttrRef",
+    "KeyRef",
+    "Pointer",
     "Ptr",
     # flag.time
     "Duration",

@@ -1,0 +1,7 @@
+site_name: {{cookiecutter.package_name}}
+
+theme:
+  name: bootstrap386
+
+plugins:
+  - mkdocstrings
