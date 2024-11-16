@@ -1,6 +1,6 @@
 from typing import Optional
 
-from go_ports.panic import panic
+from flag.panic import panic
 
 
 class Ptr[V]:

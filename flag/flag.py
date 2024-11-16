@@ -7,13 +7,13 @@ from dataclasses import dataclass
 from enum import Enum
 import inspect
 import sys
-from typing import Callable, Dict, IO, List, Optional, Tuple, Type
+from typing import Callable, Dict, IO, List, Optional, Tuple, TypeVar
 
-from go_ports.error import Error
-from go_ports.fmt import errorf
-from go_ports.ptr import Ptr
-import go_ports.strconv as strconv
-import go_ports.time as time
+from flag.error import Error
+from flag.fmt import errorf
+from flag.ptr import Ptr
+import flag.strconv as strconv
+import flag.time as time
 
 # HelpError is the error class raised if the -help or -h flag is invoked
 # but no such flag is defined.
@@ -39,27 +39,32 @@ Func = Callable[[str]]
 ValueType = bool | int | str | float | time.Duration | Func
 
 
-# Value is a class wrapping the dynamic value stored in a flag.
-#
-# If a Value's is_bool_flag() method returns True, the command-line parser
-# makes -name equivalend to -name=true rather than using the next command-line
-# argument.
-#
-# set is called once, in command line order, for each flag present. The flag
-# module may call str() with a zero-valued object, such as a nil pointer.
-class Value[V](ABC):
+class Value[T](ABC):
+    """
+    Value is a class wrapping the dynamic value stored in a flag.
+
+    If a value's is_bool_flag property returns True, the command-line parser
+    makes -name equivalent to -name=true rather than using the next
+    command-line argument.
+
+    set is called once, in command line order, for each flag present. The
+    flag module may call str() with a zero-valued object, such as a nil
+    pointer.
+    """
+
     is_bool_flag: bool = False
 
-    def __init__(self, value: V, p: Ptr[V]) -> None:
+    def __init__(self, value: T, p: Ptr[T]) -> None:
         p.set(value)
-        self.value: Ptr[V] = p
+        self.value: Ptr[T] = p
 
-    def get(self) -> V:
+    def get(self) -> T:
         return self.value.deref()
 
     @abstractmethod
     def set(self, string: str) -> None:
         pass
+
 
 class BoolValue(Value[bool]):
     def __init__(self, value: bool, p: Ptr) -> None:
@@ -120,16 +125,21 @@ class DurationValue(Value[time.Duration]):
 
 
 class FuncValue(Value[Func]):
+    def __init__(self, value: Func) -> None:
+        # In go, functions are treated as pointers
+        self.value: Ptr[Func] = Ptr(value)
+
     def set(self, string: str) -> None:
-        self.get()(string)
+        fn = self.get()
+        fn(string)
 
     def __str__(self) -> str:
         return ""
 
 
 class BoolFuncValue(FuncValue):
-    def __init__(self, value: Func, p: Ptr[Func]) -> None:
-        super().__init__(value, p)
+    def __init__(self, value: Func) -> None:
+        super().__init__(value)
         self.is_bool_flag = True
 
 
@@ -308,8 +318,56 @@ class FlagSet:
         self.float_var(p, name, value, usage)
         return p.deref()
 
+    def duration_var(
+        self, p: Ptr[float], name: str, value: time.Duration, usage: str
+    ) -> None:
+        """
+        Defines a duration flag with specified name, default value, and usage
+        string. The argument p podurations to a float in which to store the value of
+        the flag.
+        """
 
-# BOOKMARK
+        self.var(DurationValue(value, p), name, usage)
+
+    def duration(self, name: str, value: time.Duration, usage: str) -> time.Duration:
+        """
+        Defines a duration flag with specified name, default value, and usage
+        string. The return value is a go_ports.time.Duration, a subclass of
+        datetime.timedelta.
+        """
+        p = Ptr(value)
+        self.duration_var(p, name, value, usage)
+        return p.deref()
+
+    def func(self, name: str, usage: str, fn: Func) -> None:
+        """
+        Defines a flag with the specified name and usage string. Each time the
+        flag is seen, fn is called with the value of the flag. If fn raises
+        an exception, it will be treated as a flag value parsing error.
+        """
+        self.var(FuncValue(fn), name, usage)
+
+    def bool_func(self, name: str, usage: str, fn: Func) -> None:
+        """
+        Defines a flag with the specified name and usage string without requiring
+        values. Each time the flag is seen, fn is called with the value of the
+        flag. If fn raises an exception, it will be treated as a flag value parsing
+        error.
+        """
+        self.var(FuncValue(fn), name, usage)
+
+    def var(self, value: Value, name: str, usage: str) -> None:
+        """
+        Defines a flag with the specified name and usage string. The type and
+        value of the flag are represented by the first argument, of type
+        Value, which typically holds a user-defined implementation of Value.
+        For instance, the caller could create a flag that turns a
+        comma-separated string into a list of string by implementing a
+        subclass of Value; in particular, Value#set would decompose the
+        comma-separated string into the slice.
+        """
+        ...
+
 
 @dataclass
 class Flag:
@@ -390,7 +448,11 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     elif isinstance(flag.value, DurationValue):
         return value == str(time.Duration())
     else:
-        raise errorf("can not construct zero {t} for flag {f}", t=type(flag.value.get()), f=flag.name)
+        raise errorf(
+            "can not construct zero {t} for flag {f}",
+            t=type(flag.value.get()),
+            f=flag.name,
+        )
 
 
 def unquote_usage(flag: "Flag") -> Tuple[str, str]:
@@ -519,6 +581,7 @@ def int_(name: str, value: int, usage: str) -> bool:
 
     return command_line.int(name, value, usage)
 
+
 def string_var(p: Ptr[str], name: str, value: str, usage: str) -> None:
     """
     Defines a string flag with specified name, default value, and usage
@@ -526,6 +589,7 @@ def string_var(p: Ptr[str], name: str, value: str, usage: str) -> None:
     the flag.
     """
     command_line.var(StringValue(value, p), name, usage)
+
 
 def string(name: str, value: str, usage: str) -> str:
     """
@@ -553,7 +617,14 @@ def float_(name: str, value: float, usage: str) -> float:
     return command_line.float(name, value, usage)
 
 
-# BOOKMARK
+def duration_var(p: Ptr[float], name: str, value: time.Duration, usage: str) -> None:
+    """
+    Defines a duration flag with specified name, default value, and usage
+    string. The argument p podurations to a float in which to store the value of
+    the flag.
+    """
+    command_line.var(DurationValue(value, p), name, usage)
+
 
 def duration(name: str, value: time.Duration, usage: str) -> time.Duration:
     """
@@ -561,35 +632,39 @@ def duration(name: str, value: time.Duration, usage: str) -> time.Duration:
     string. The return value is a go_ports.time.Duration, a subclass of
     datetime.timedelta.
     """
-    ...
+    return command_line.duration(name, value, usage)
 
 
-
-
-
-command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
-
-
-
-
-def bool_func(name: str, usage: str, fn: Callable[[str]]) -> None:
-    """
-    Defines a flag with the specified name and useage string without requiring
-    values. Each time the flag is seen, fn is called with the value of the
-    flag. If fn raises an exception, it will be treated as a flag value
-    parsing error.
-    """
-
-    pass
-
-
-def func(name: str, usage: str, fn: Callable[[str]]) -> None:
+def func(name: str, usage: str, fn: Func) -> None:
     """
     Defines a flag with the specified name and usage string. Each time the
     flag is seen, fn is called with the value of the flag. If fn raises
     an exception, it will be treated as a flag value parsing error.
     """
+    return command_line.func(name, usage, fn)
 
+
+def bool_func(name: str, usage: str, fn: Func) -> None:
+    """
+    Defines a flag with the specified name and usage string without requiring
+    values. Each time the flag is seen, fn is called with the value of the
+    flag. If fn raises an exception, it will be treated as a flag value parsing
+    error.
+    """
+    return command_line.bool_func(name, usage, fn)
+
+
+# TODO: generic type
+def var(value: Value, name: str, usage: str) -> None:
+    """
+    Defines a flag with the specified name and usage string. The type and value
+    of the flag are represented by the first argument, of type Value, which
+    typically holds a user-defined implementation of Value.
+    """
+    command_line.var(value, name, usage)
+
+
+def parse_one() -> None: ...
 
 
 def parse() -> bool:
@@ -597,17 +672,17 @@ def parse() -> bool:
     Parses the command-line flags from sys.argv[1:]. Must be called after all
     flags are defined and before flags are accessed by the program.
     """
+    ...
 
 
 def parsed() -> bool:
     """
     Whether the command-line flags have been parsed.
     """
+    ...
 
 
-def var(value: Type[Value], name: str, usage: str) -> None:
-    """
-    Defines a flag with the specified name and usage string. The type and value
-    of the flag are represented by the first argument, of type Value, which
-    typically holds a user-defined implementation of Value.
-    """
+command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
+
+
+def init() -> None: ...

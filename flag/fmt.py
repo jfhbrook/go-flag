@@ -1,6 +1,6 @@
-from typing import Any, List, Dict, Type
+from typing import Any, Type
 
-from go_ports.error import Error
+from flag.error import Error
 
 
 def errorf(format: str, *args: Any, **kwargs: Any) -> Type[Error]:

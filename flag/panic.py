@@ -5,6 +5,7 @@ class Panic(Exception):
     """
     Panic!
     """
+
     pass
 
 

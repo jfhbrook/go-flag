@@ -4,10 +4,9 @@ from functools import wraps
 from typing import Any, Callable, cast, Dict, Generator, List, Optional, TypeVar
 import warnings
 
-from go_ports.error import GoError
-from go_ports.panic import panic, Panic
+from flag.panic import panic, Panic
 
-Fn = TypeVar('Fn', bound=Callable)
+Fn = TypeVar("Fn", bound=Callable)
 
 DeferFn = Callable[[], None]
 
