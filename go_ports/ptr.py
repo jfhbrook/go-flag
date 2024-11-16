@@ -1,34 +1,43 @@
-"""
-A port of go's flag package: https://pkg.go.dev/flag
-"""
-
-from typing import cast
-from weakref import WeakValueDictionary
-
-
-# TODO: Add generic type to Ptr - go does support such a type
 class Ptr[V]:
     """
-    A pointer. Go has pointers, Python does not. Python's references will
-    often be sufficient, but won't allow for setting the value of a pointer.
-    This class is used in those cases.
+    A pointer. Go has pointers, Python does not. In cases where a value needs
+    to be updated by reference, this class can help.
 
-    Note that Ptr is not type safe - you will need to inspect or cast its
-    value after dereferencing it.
+    Note that this is NOT a true pointer - it won't update the value of a
+    wrapped variable. For example:
+
+    ```py
+    value = False
+    p = Ptr(value)
+    p.set(True)
+
+    # This will fail!
+    assert value
+    ```
+
+    Instead, create the value as a pointer, and use the pointer to set
+    the value:
+
+    ```
+    value = Ptr(False)
+    p.set(True)
+
+    # This will succeed
+    assert value.deref()
+    ```
     """
 
-    _current: int = 0
-    _values: WeakValueDictionary[int, object] = WeakValueDictionary()
-
     def __init__(self, value: V) -> None:
-        self._values[self._current] = value
-
-        self.address: int = self._current
-
-        self._current += 1
+        self.value: V = value
 
     def set(self, value: V) -> None:
-        self._values[self.address] = value
+        """
+        Set the value at a pointer.
+        """
+        self.value = value
 
     def deref(self) -> V:
-        return cast(V, self._values[self.address])
+        """
+        Dereference the pointer, getting its underlying value.
+        """
+        return self.value

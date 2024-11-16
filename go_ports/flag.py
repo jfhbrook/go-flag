@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 import inspect
 import sys
-from typing import Callable, cast, Dict, IO, List, Optional, Tuple, Type
+from typing import Callable, Dict, IO, List, Optional, Tuple, Type
 
 from go_ports.error import Error
 from go_ports.fmt import errorf
@@ -48,7 +48,6 @@ ValueType = bool | int | str | float | time.Duration | Func
 # set is called once, in command line order, for each flag present. The flag
 # module may call str() with a zero-valued object, such as a nil pointer.
 class Value[V](ABC):
-    value: Ptr[V]
     is_bool_flag: bool = False
 
     def __init__(self, value: V, p: Ptr[V]) -> None:
