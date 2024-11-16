@@ -1,7 +1,7 @@
 from typing import Any, List, Dict, Type
 
-from go_ports.error import GoError
+from go_ports.error import Error
 
 
-def errorf(format: str, *args: List[Any], **kwargs: Dict[str, Any]) -> Type[GoError]:
-    return GoError.from_string(format.format(*args, **kwargs))
+def errorf(format: str, *args: Any, **kwargs: Any) -> Type[Error]:
+    return Error.from_string(format.format(*args, **kwargs))
