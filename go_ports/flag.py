@@ -266,8 +266,7 @@ class FlagSet:
     def int(self, name: str, value: int, usage: str) -> int:
         """
         Defines an int flag with specified name, default value, and usage
-        string. The return value is a pointer to an int that stores the
-        value of the flag.
+        string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.int_var(p, name, value, usage)
@@ -276,8 +275,8 @@ class FlagSet:
     def string_var(self, p: Ptr, name: str, value: str, usage: str) -> None:
         """
         Defines a string flag with specified name, default value, and usage
-        string. The return value is a pointer to a string that stores the
-        value of the flag.
+        string. The argument p points to a string in which to store the value
+        of the flag.
         """
 
         self.var(StringValue(value, p), name, usage)
@@ -285,8 +284,7 @@ class FlagSet:
     def string(self, name: str, value: str, usage: str) -> str:
         """
         Defines a string flag with specified name, default value, and usage
-        string. The return value is a pointer to a string that stores the
-        value of the flag.
+        string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.string_var(p, name, value, usage)
@@ -295,8 +293,8 @@ class FlagSet:
     def float_var(self, p: Ptr[float], name: str, value: float, usage: str) -> None:
         """
         Defines a float flag with specified name, default value, and usage
-        float. The return value is a pointer to a float that stores the
-        value of the flag.
+        float. The argument p points to a float in which to store the value
+        of the flag.
         """
 
         self.var(FloatValue(value, p), name, usage)
@@ -304,8 +302,7 @@ class FlagSet:
     def float(self, name: str, value: float, usage: str) -> float:
         """
         Defines a float flag with specified name, default value, and usage
-        float. The return value is a pointer to a float that stores the
-        value of the flag.
+        float. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.float_var(p, name, value, usage)

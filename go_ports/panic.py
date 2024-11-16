@@ -1,13 +1,16 @@
+from typing import NoReturn
+
+
 class Panic(Exception):
     """
-    Raised when panicking.
+    Panic!
     """
     pass
 
 
-def panic(message: str) -> None:
+def panic(message: str) -> NoReturn:
     """
-    Panic. Raises a Panic exception.
+    Panic!
     """
 
     raise Panic(message)

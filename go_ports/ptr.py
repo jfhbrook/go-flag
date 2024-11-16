@@ -1,3 +1,8 @@
+from typing import Optional
+
+from go_ports.panic import panic
+
+
 class Ptr[V]:
     """
     A pointer. Go has pointers, Python does not. This class assists in
@@ -37,8 +42,10 @@ class Ptr[V]:
     ```
     """
 
-    def __init__(self, value: V) -> None:
-        self.value: V = value
+    value: Optional[V]
+
+    def __init__(self, value: Optional[V] = None) -> None:
+        self.value = value
 
     def set(self, value: V) -> None:
         """
@@ -50,4 +57,6 @@ class Ptr[V]:
         """
         Dereference the pointer, getting its underlying value.
         """
-        return self.value
+        if self.value is not None:
+            return self.value
+        panic("nil pointer dereference")
