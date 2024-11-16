@@ -102,11 +102,11 @@ class StringValue(Value[str]):
 
 class FloatValue(Value[float]):
     def set(self, string: str) -> None:
-        v: float = strconv.parse_float(string, 64)
+        v: float = strconv.parse_float(string)
         self.value.set(v)
 
     def __str__(self) -> str:
-        return strconv.format_float(self.get(), "g", -1, 64)
+        return strconv.format_float(self.get(), "g", -1)
 
 
 class DurationValue(Value[time.Duration]):
@@ -127,7 +127,7 @@ class DurationValue(Value[time.Duration]):
 class FuncValue(Value[Func]):
     def __init__(self, value: Func) -> None:
         # In go, functions are treated as pointers
-        self.value: Pointer[Func] = Ptr(value)
+        self.value = Ptr(value)
 
     def set(self, string: str) -> None:
         fn = self.get()
@@ -366,7 +366,7 @@ class FlagSet:
         subclass of Value; in particular, Value#set would decompose the
         comma-separated string into the slice.
         """
-        ...
+        raise NotImplementedError("FlagSet#var")
 
 
 @dataclass
@@ -573,7 +573,7 @@ def int_var(p: Pointer[int], name: str, value: int, usage: str) -> None:
     command_line.var(IntValue(value, p), name, usage)
 
 
-def int_(name: str, value: int, usage: str) -> bool:
+def int_(name: str, value: int, usage: str) -> int:
     """
     Defines an int flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -618,7 +618,7 @@ def float_(name: str, value: float, usage: str) -> float:
 
 
 def duration_var(
-    p: Pointer[float], name: str, value: time.Duration, usage: str
+    p: Pointer[time.Duration], name: str, value: time.Duration, usage: str
 ) -> None:
     """
     Defines a duration flag with specified name, default value, and usage
@@ -666,7 +666,8 @@ def var(value: Value, name: str, usage: str) -> None:
     command_line.var(value, name, usage)
 
 
-def parse_one() -> None: ...
+def parse_one() -> None:
+    raise NotImplementedError("parse_one")
 
 
 def parse() -> bool:
@@ -674,17 +675,18 @@ def parse() -> bool:
     Parses the command-line flags from sys.argv[1:]. Must be called after all
     flags are defined and before flags are accessed by the program.
     """
-    ...
+    raise NotImplementedError("parse")
 
 
 def parsed() -> bool:
     """
     Whether the command-line flags have been parsed.
     """
-    ...
+    raise NotImplementedError("parsed")
 
 
 command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
 
 
-def init() -> None: ...
+def init() -> None:
+    raise NotImplementedError("init")
