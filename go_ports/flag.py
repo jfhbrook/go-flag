@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 import inspect
 import sys
-from typing import Any, Callable, cast, Dict, IO, List, Optional, Tuple, Type, TypeVar
+from typing import Callable, cast, Dict, IO, List, Optional, Tuple, Type
 
 from go_ports.error import Error
 from go_ports.fmt import errorf
@@ -48,19 +48,15 @@ ValueType = bool | int | str | float | time.Duration | Func
 # set is called once, in command line order, for each flag present. The flag
 # module may call str() with a zero-valued object, such as a nil pointer.
 class Value[V](ABC):
-    value: Ptr
+    value: Ptr[V]
     is_bool_flag: bool = False
 
-    def __init__(self, value: V, p: Ptr) -> None:
+    def __init__(self, value: V, p: Ptr[V]) -> None:
         p.set(value)
-        self.value: Ptr = p
+        self.value: Ptr[V] = p
 
     def get(self) -> V:
-        # Go doesn't have base classes, just interfaces, so this method is
-        # implemented for every implementation of the interface, including
-        # a cast. In our case, we already know the value type, so we can
-        # implement get once here.
-        return cast(V, self.value.deref())
+        return self.value.deref()
 
     @abstractmethod
     def set(self, string: str) -> None:
@@ -133,7 +129,7 @@ class FuncValue(Value[Func]):
 
 
 class BoolFuncValue(FuncValue):
-    def __init__(self, value: Func, p: Ptr) -> None:
+    def __init__(self, value: Func, p: Ptr[Func]) -> None:
         super().__init__(value, p)
         self.is_bool_flag = True
 
@@ -243,7 +239,7 @@ class FlagSet:
         """
         return len(self.args)
 
-    def bool_var(self, p: Ptr, name: str, value: bool, usage: str) -> None:
+    def bool_var(self, p: Ptr[bool], name: str, value: bool, usage: str) -> None:
         """
         Defines a bool flag with specified name, default value, and usage
         string. The argument p points to a bool variable in which to store
@@ -251,17 +247,16 @@ class FlagSet:
         """
         self.var(BoolValue(value, p), name, usage)
 
-    # TODO: Deref the pointer
-    def bool(self, name: str, value: bool, usage: str) -> Ptr:
+    def bool(self, name: str, value: bool, usage: str) -> bool:
         """
         Defines a bool flag with specified name, default value, and usage
-        string. The return value is a pointer to the value of the flag.
+        string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.bool_var(p, name, value, usage)
-        return p
+        return p.deref()
 
-    def int_var(self, p: Ptr, name: str, value: int, usage: str) -> None:
+    def int_var(self, p: Ptr[int], name: str, value: int, usage: str) -> None:
         """
         Defines an int flag with specified name, default value, and usage
         string. The argument p points to an int in which to store the value
@@ -269,15 +264,15 @@ class FlagSet:
         """
         self.var(IntValue(value, p), name, usage)
 
-    def int(self, name: str, value: int, usage: str) -> Ptr:
+    def int(self, name: str, value: int, usage: str) -> int:
         """
         Defines an int flag with specified name, default value, and usage
         string. The return value is a pointer to an int that stores the
         value of the flag.
         """
-        p = Ptr(0)
+        p = Ptr(value)
         self.int_var(p, name, value, usage)
-        return p
+        return p.deref()
 
     def string_var(self, p: Ptr, name: str, value: str, usage: str) -> None:
         """
@@ -288,17 +283,17 @@ class FlagSet:
 
         self.var(StringValue(value, p), name, usage)
 
-    def string(self, name: str, value: str, usage: str) -> Ptr:
+    def string(self, name: str, value: str, usage: str) -> str:
         """
         Defines a string flag with specified name, default value, and usage
         string. The return value is a pointer to a string that stores the
         value of the flag.
         """
-        p = Ptr(0)
+        p = Ptr(value)
         self.string_var(p, name, value, usage)
-        return p
+        return p.deref()
 
-    def float_var(self, p: Ptr, name: str, value: float, usage: str) -> None:
+    def float_var(self, p: Ptr[float], name: str, value: float, usage: str) -> None:
         """
         Defines a float flag with specified name, default value, and usage
         float. The return value is a pointer to a float that stores the
@@ -307,15 +302,15 @@ class FlagSet:
 
         self.var(FloatValue(value, p), name, usage)
 
-    def float(self, name: str, value: float, usage: str) -> Ptr:
+    def float(self, name: str, value: float, usage: str) -> float:
         """
         Defines a float flag with specified name, default value, and usage
         float. The return value is a pointer to a float that stores the
         value of the flag.
         """
-        p = Ptr(0)
+        p = Ptr(value)
         self.float_var(p, name, value, usage)
-        return p
+        return p.deref()
 
 
 # BOOKMARK
@@ -492,7 +487,7 @@ def args() -> List[str]:
     return command_line.args
 
 
-def bool_var(p: Ptr, name: str, value: bool, usage: str) -> None:
+def bool_var(p: Ptr[bool], name: str, value: bool, usage: str) -> None:
     """
     Defines a bool flag with specified name, default value, and usage string.
     The argument p points to a bool variable in which to store the value of
@@ -501,7 +496,7 @@ def bool_var(p: Ptr, name: str, value: bool, usage: str) -> None:
     command_line.var(BoolValue(value, p), name, usage)
 
 
-def bool_(name: str, value: bool, usage: str) -> Ptr:
+def bool_(name: str, value: bool, usage: str) -> bool:
     """
     Defines a bool flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -510,7 +505,7 @@ def bool_(name: str, value: bool, usage: str) -> Ptr:
     return command_line.bool(name, value, usage)
 
 
-def int_var(p: Ptr, name: str, value: int, usage: str) -> None:
+def int_var(p: Ptr[int], name: str, value: int, usage: str) -> None:
     """
     Defines an int flag with specified name, default value, and usage
     string. The argument p points to an int in which to store the value of
@@ -519,7 +514,7 @@ def int_var(p: Ptr, name: str, value: int, usage: str) -> None:
     command_line.var(IntValue(value, p), name, usage)
 
 
-def int_(name: str, value: int, usage: str) -> Ptr:
+def int_(name: str, value: int, usage: str) -> bool:
     """
     Defines an int flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -527,7 +522,7 @@ def int_(name: str, value: int, usage: str) -> Ptr:
 
     return command_line.int(name, value, usage)
 
-def string_var(p: Ptr, name: str, value: str, usage: str) -> None:
+def string_var(p: Ptr[str], name: str, value: str, usage: str) -> None:
     """
     Defines a string flag with specified name, default value, and usage
     string. The argument p points to a string in which to store the value of
@@ -543,7 +538,7 @@ def string(name: str, value: str, usage: str) -> str:
     return command_line.string(name, value, usage)
 
 
-def float_var(p: Ptr, name: str, value: float, usage: str) -> None:
+def float_var(p: Ptr[float], name: str, value: float, usage: str) -> None:
     """
     Defines a float flag with specified name, default value, and usage
     string. The argument p pofloats to a float in which to store the value of
@@ -552,7 +547,7 @@ def float_var(p: Ptr, name: str, value: float, usage: str) -> None:
     command_line.var(IntValue(value, p), name, usage)
 
 
-def float_(name: str, value: float, usage: str) -> Ptr:
+def float_(name: str, value: float, usage: str) -> float:
     """
     Defines a float flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
