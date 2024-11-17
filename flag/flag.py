@@ -175,7 +175,7 @@ class FuncValue(Value[Func]):
         fn = self.get()
         fn(string)
 
-    def string(self, value: Func) -> str:
+    def __str__(self) -> str:
         return ""
 
 
