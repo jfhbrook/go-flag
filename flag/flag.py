@@ -67,6 +67,9 @@ class Value[T](ABC):
     def set(self, string: str) -> None:
         pass
 
+    def __str__(self) -> str:
+        return str(self.get())
+
 
 class BoolValue(Value[bool]):
     def __init__(self, value: bool, p: Pointer) -> None:
@@ -86,16 +89,10 @@ class IntValue(Value[int]):
         v: int = int(string)
         self.value.set(v)
 
-    def __str__(self) -> str:
-        return str(self.get())
-
 
 class StringValue(Value[str]):
     def set(self, string: str) -> None:
         self.value.set(string)
-
-    def __str__(self) -> str:
-        return self.get()
 
 
 class FloatValue(Value[float]):
@@ -111,9 +108,6 @@ class DurationValue(Value[datetime.timedelta]):
     def set(self, string: str) -> None:
         v: datetime.timedelta = time.parse_duration(string)
         self.value.set(v)
-
-    def __str__(self) -> str:
-        return str(self.value.deref())
 
 
 # NOTE: Go implements a text value type, which can use its
