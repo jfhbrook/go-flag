@@ -403,8 +403,8 @@ class FlagSet:
     ) -> None:
         """
         Defines a duration flag with specified name, default value, and usage
-        string. The argument p podurations to a float in which to store the value of
-        the flag.
+        string. The argument p points to a datetime.timedelta in which to store
+        the value of the flag.
         """
 
         self.var(DurationValue(value, p), name, usage)
@@ -414,8 +414,7 @@ class FlagSet:
     ) -> Pointer[datetime.timedelta]:
         """
         Defines a duration flag with specified name, default value, and usage
-        string. The return value is a go_ports.time.Duration, a subclass of
-        datetime.timedelta.
+        string. The return value is a pointer to a datetime.timedelta.
         """
         p = Ptr(value)
         self.duration_var(p, name, value, usage)

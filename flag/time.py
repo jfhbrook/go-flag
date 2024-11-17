@@ -4,6 +4,21 @@ from flag.panic import panic, Panic
 
 
 class Duration(datetime.timedelta):
+    """
+    Duration is a subclass of datetime.timedelta. Calling str() on it will
+    return a representation similar to what you'd expect from go's
+    time.Duration, but it is otherwise compatible to a datetime.timedelta.
+    """
+
+    @classmethod
+    def to_timedelta(cls, duration: datetime.timedelta) -> datetime.timedelta:
+        """
+        Convert a Duration into a standard datetime.timedelta.
+
+        (This method will actually accept and clone any datetime.timedelta.)
+        """
+        return datetime.timedelta(seconds=duration.total_seconds())
+
     def __str__(self) -> str:
         secs = int(self.total_seconds())
         mins = secs // 60
@@ -18,6 +33,9 @@ class Duration(datetime.timedelta):
 
 
 def parse_duration(s: str) -> Duration:
+    """
+    Parse a string into a Duration.
+    """
     error = f"invalid format for duration: {s}"
     hours = ""
     mins = ""
