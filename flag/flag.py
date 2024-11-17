@@ -43,48 +43,68 @@ def set_value(self: "Value", value: str) -> None:
 
 class Value[T](ABC):
     """
-    Value is a class wrapping the dynamic value stored in a flag.
-
-    If a value's is_bool_flag property returns True, the command-line parser
-    makes -name equivalent to -name=true rather than using the next
-    command-line argument.
-
-    set is called once, in command line order, for each flag present. The
-    flag module may call str() with a zero-valued object, such as a nil
-    pointer.
+    Value is a class wrapping the dynamic value stored in a flag. In go,
+    Value, Getter and boolFlag are all interfaces applied to vanilla pointers.
+    In our case, we combine those into a single abstract class and handle
+    some differences between the two languages.
     """
-
-    is_bool_flag: bool = False
 
     def __init__(self, value: T, p: Pointer[T]) -> None:
         p.set(value)
         self.value: Pointer[T] = p
 
     def get(self) -> T:
+        """
+        Get the underlying value. In most cases, this is dereferencing the
+        underlying pointer.
+        """
         return self.value.deref()
 
     @abstractmethod
     def set(self, string: str) -> None:
+        """
+        set is called once, in command line order, for each flag present. The
+        flag module may call str() with a zero-valued object, such as a nil
+        pointer.
+        """
         pass
 
     def zero(self) -> str:
-        panic("can not construct zero")
+        """
+        Construct a string representation of a "zero value". This is used
+        to determine whether or not the default value should be explicitly
+        printed within usage text.
+
+        In some cases - for example, with function values - there will not be
+        a sensible zero value. In those cases, we panic.
+        """
+        panic("can not construct zero value")
+
+    @property
+    def is_bool_flag(self) -> bool:
+        """
+        If a value's is_bool_flag property returns True, the command-line parser
+        makes -name equivalent to -name=true rather than using the next
+        command-line argument.
+        """
+
+        return False
 
     def __str__(self) -> str:
         return str(self.get())
 
 
 class BoolValue(Value[bool]):
-    def __init__(self, value: bool, p: Pointer) -> None:
-        super().__init__(value, p)
-        self.is_bool_flag = True
-
     def set(self, string: str) -> None:
         v: bool = strconv.parse_bool(string)
         self.value.set(v)
 
     def zero(self) -> str:
         return "false"
+
+    @property
+    def is_bool_flag(self) -> bool:
+        return True
 
     def __str__(self) -> str:
         return strconv.format_bool(self.get())
@@ -148,9 +168,9 @@ class FuncValue(Value[Func]):
 
 
 class BoolFuncValue(FuncValue):
-    def __init__(self, value: Func) -> None:
-        super().__init__(value)
-        self.is_bool_flag = True
+    @property
+    def is_bool_flag(self) -> bool:
+        return True
 
 
 class ErrorHandling(Enum):
@@ -613,7 +633,7 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
         return value == flag.value.zero()
     except Panic as exc:
         raise errorf(
-            "panic constructing zero {typ} for flag {name}",
+            "exception while constructing zero {typ} for flag {name}",
             typ=type(flag.value),
             name=flag.name,
         ) from exc
