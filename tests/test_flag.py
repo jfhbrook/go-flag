@@ -147,7 +147,6 @@ def _test_parse(f: FlagSet) -> None:
     assert f.args[0] == extra, f"expected argument {extra}"
 
 
-@pytest.mark.skip
 def test_parse(command_line, usage) -> None:
     usage.side_effect = Error.from_string("bad parse")
     _test_parse(command_line)
