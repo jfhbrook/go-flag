@@ -63,9 +63,7 @@ class Value[T](ABC):
     @abstractmethod
     def set(self, string: str) -> None:
         """
-        set is called once, in command line order, for each flag present. The
-        flag module may call str() with a zero-valued object, such as a nil
-        pointer.
+        set is called once, in command line order, for each flag present.
         """
         pass
 
@@ -91,7 +89,20 @@ class Value[T](ABC):
         return False
 
     def __str__(self) -> str:
-        return str(self.get())
+        """
+        A string representation of the value. When the value is unset (a
+        nil pointer), the zero value is used - otherwise, we call the string
+        method with the value.
+        """
+        if self.value.is_nil():
+            return self.zero()
+        return self.string(self.get())
+
+    def string(self, value: T) -> str:
+        """
+        Return a string representation of the underlying value.
+        """
+        return str(value)
 
 
 class BoolValue(Value[bool]):
@@ -106,8 +117,8 @@ class BoolValue(Value[bool]):
     def is_bool_flag(self) -> bool:
         return True
 
-    def __str__(self) -> str:
-        return strconv.format_bool(self.get())
+    def string(self, value: bool) -> str:
+        return strconv.format_bool(value)
 
 
 class IntValue(Value[int]):
@@ -135,8 +146,8 @@ class FloatValue(Value[float]):
     def zero(self) -> str:
         return "0"
 
-    def __str__(self) -> str:
-        return strconv.format_float(self.get())
+    def string(self, value: float) -> str:
+        return strconv.format_float(value)
 
 
 class DurationValue(Value[datetime.timedelta]):
@@ -163,7 +174,7 @@ class FuncValue(Value[Func]):
         fn = self.get()
         fn(string)
 
-    def __str__(self) -> str:
+    def string(self, value: Func) -> str:
         return ""
 
 
