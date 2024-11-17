@@ -22,6 +22,13 @@ class Pointer[V](Protocol):
         """
         ...
 
+    def is_nil(self) -> bool:
+        """
+        Whether or not the pointer is nil. If the pointer is nil, then
+        dereferencing it will cause a panic.
+        """
+        ...
+
 
 class Ptr[V](Pointer):
     """
@@ -71,6 +78,9 @@ class Ptr[V](Pointer):
         if self.value is not None:
             return self.value
         panic("nil pointer dereference")
+
+    def is_nil(self) -> bool:
+        return self.value is None
 
 
 class AttrRef[V](Pointer):
@@ -122,6 +132,15 @@ class AttrRef[V](Pointer):
             return cast(V, attr)
         panic("nil pointer dereference")
 
+    def is_nil(self) -> bool:
+        if not hasattr(self.obj, self.name):
+            return True
+
+        if getattr(self.obj, self.name) is None:
+            return True
+
+        return False
+
 
 class KeyRef[V](Pointer):
     """
@@ -166,3 +185,6 @@ class KeyRef[V](Pointer):
         if value is not None:
             return cast(V, value)
         panic("nil pointer dereference")
+
+    def is_nil(self) -> bool:
+        return self.dict_.get(self.key, None) is None
