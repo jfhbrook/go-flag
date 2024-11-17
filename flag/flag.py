@@ -293,7 +293,7 @@ class FlagSet:
         """
         self.var(BoolValue(value, p), name, usage)
 
-    def bool(self, name: str, value: bool, usage: str) -> Pointer[bool]:
+    def bool_(self, name: str, value: bool, usage: str) -> Pointer[bool]:
         """
         Defines a bool flag with specified name, default value, and usage
         string. The return value is the value of the flag.
@@ -723,7 +723,7 @@ def bool_(name: str, value: bool, usage: str) -> Pointer[bool]:
     string. The return value is the value of the flag.
     """
 
-    return command_line.bool(name, value, usage)
+    return command_line.bool_(name, value, usage)
 
 
 def int_var(p: Pointer[int], name: str, value: int, usage: str) -> None:
