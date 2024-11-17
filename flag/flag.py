@@ -71,7 +71,8 @@ class Value[T](ABC):
         """
         Construct a string representation of a "zero value". This is used
         to determine whether or not the default value should be explicitly
-        printed within usage text.
+        printed within usage text, and when calling str(v) on an unitialized
+        value (where the underlying pointer is nil).
 
         In some cases - for example, with function values - there will not be
         a sensible zero value. In those cases, we panic.
