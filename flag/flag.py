@@ -4,6 +4,7 @@ A port of go's flag package: https://pkg.go.dev/flag
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import datetime
 from enum import Enum
 import inspect
 import sys
@@ -111,9 +112,9 @@ class FloatValue(Value[float]):
         return strconv.format_float(self.get())
 
 
-class DurationValue(Value[time.Duration]):
+class DurationValue(Value[datetime.timedelta]):
     def set(self, string: str) -> None:
-        v: time.Duration = time.parse_duration(string)
+        v: datetime.timedelta = time.parse_duration(string)
         self.value.set(v)
 
     def __str__(self) -> str:
@@ -356,7 +357,11 @@ class FlagSet:
         return p
 
     def duration_var(
-        self, p: Pointer[time.Duration], name: str, value: time.Duration, usage: str
+        self,
+        p: Pointer[datetime.timedelta],
+        name: str,
+        value: datetime.timedelta,
+        usage: str,
     ) -> None:
         """
         Defines a duration flag with specified name, default value, and usage
@@ -367,8 +372,8 @@ class FlagSet:
         self.var(DurationValue(value, p), name, usage)
 
     def duration(
-        self, name: str, value: time.Duration, usage: str
-    ) -> Pointer[time.Duration]:
+        self, name: str, value: datetime.timedelta, usage: str
+    ) -> Pointer[datetime.timedelta]:
         """
         Defines a duration flag with specified name, default value, and usage
         string. The return value is a go_ports.time.Duration, a subclass of
@@ -780,7 +785,7 @@ def float_(name: str, value: float, usage: str) -> Pointer[float]:
 
 
 def duration_var(
-    p: Pointer[time.Duration], name: str, value: time.Duration, usage: str
+    p: Pointer[datetime.timedelta], name: str, value: datetime.timedelta, usage: str
 ) -> None:
     """
     Defines a duration flag with specified name, default value, and usage
@@ -790,11 +795,12 @@ def duration_var(
     command_line.var(DurationValue(value, p), name, usage)
 
 
-def duration(name: str, value: time.Duration, usage: str) -> Pointer[time.Duration]:
+def duration(
+    name: str, value: datetime.timedelta, usage: str
+) -> Pointer[datetime.timedelta]:
     """
     Defines a duration flag with specified name, default value, and usage
-    string. The return value is a go_ports.time.Duration, a subclass of
-    datetime.timedelta.
+    string. The return value is pointer to a datetime.timedelta.
     """
     return command_line.duration(name, value, usage)
 
