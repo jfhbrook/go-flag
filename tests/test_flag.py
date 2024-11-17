@@ -118,7 +118,6 @@ def test_usage(command_line, usage) -> None:
 
 def _test_parse(f: FlagSet) -> None:
     assert not f.parsed, "f.parse should be false before parse"
-    # TODO: These need to return pointers laul
     bool_flag = f.bool_("bool", False, "bool value")
     bool2_flag = f.bool_("bool2", False, "bool2 value")
     int_flag = f.int("int", 0, "int value")
