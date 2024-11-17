@@ -77,7 +77,6 @@ def test_everything(command_line, usage) -> None:
     assert is_sorted(flag_names), f"flag names are sorted: {flag_names}"
 
 
-@pytest.mark.todo
 def test_get(command_line, usage) -> None:
     bool_("test_bool", True, "bool value")
     int_("test_int", 1, "int value")
@@ -108,6 +107,6 @@ def _test_parse(command_line, usage) -> None:
     NotImplementedError("_test_parse")
 
 
-@pytest.mark.todo
+@pytest.mark.skip
 def test_parse(command_line, usage) -> None:
     _test_parse(command_line, usage)
