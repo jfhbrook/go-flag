@@ -18,7 +18,6 @@ from flag import (
     set_,
     string,
     Value,
-    var,
     visit,
     visit_all,
 )
@@ -95,7 +94,7 @@ def test_get(command_line, usage) -> None:
             v = f.value
             ok: bool = False
             if f.name == "test_bool":
-                ok = v.get() == True
+                ok = v.get() is True
             elif f.name == "test_int":
                 ok = v.get() == 1
             elif f.name == "test_string":
@@ -139,8 +138,8 @@ def _test_parse(f: FlagSet) -> None:
     ]
     f.parse(args)
     assert f.parsed, "f.parse should be true after parse"
-    assert bool_flag.deref() == True, "bool flag should be true"
-    assert bool2_flag.deref() == True, "bool2 flag should be true"
+    assert bool_flag.deref() is True, "bool flag should be true"
+    assert bool2_flag.deref() is True, "bool2 flag should be true"
     assert int_flag.deref() == 22, "int flag should be 22"
     assert string_flag.deref() == "hello", "string flag should be `hello`"
     assert float_flag.deref() == 2718e28, "float flag should be 2718e28"

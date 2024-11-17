@@ -536,10 +536,16 @@ class FlagSet:
 
     # Prints to standard error a formatted error and usage message, and
     # raises the error.
-    def failf(self, format_: str, *args: Any, **kwargs: Any) -> NoReturn:
+    def failf(
+        self, format_: str, *args: Any, exc: Optional[Exception] = None, **kwargs: Any
+    ) -> NoReturn:
         msg = format_.format(*args, **kwargs)
         self.usage()
-        raise Error(msg)
+        err = Error(msg)
+        if exc:
+            raise err from exc
+        else:
+            raise err
 
     def parse_one(self) -> bool:
         if not self.args:
@@ -591,7 +597,10 @@ class FlagSet:
                     set_value(flag.value, "true")
                 except Error as exc:
                     self.failf(
-                        "invalid boolean flag {name}: {value}", name=name, value=value
+                        "invalid boolean flag {name}: {value}",
+                        name=name,
+                        value=value,
+                        exc=exc,
                     )
         else:
             # It must have a value, which might be the next argument.
