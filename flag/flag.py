@@ -11,6 +11,7 @@ from typing import Callable, Dict, IO, List, Optional, Tuple
 
 from flag.error import Error
 from flag.fmt import errorf
+from flag.panic import panic
 from flag.pointer import Pointer, Ptr
 import flag.strconv as strconv
 import flag.time as time
@@ -367,7 +368,24 @@ class FlagSet:
         subclass of Value; in particular, Value#set would decompose the
         comma-separated string into the slice.
         """
-        raise NotImplementedError("FlagSet#var")
+
+        # Flag must not begin with "-" or contain "=".
+        if name.startswith("-"):
+            panic(f"flag {name} begins with -")
+        elif "=" in name:
+            panic(f"flag {name} contains =")
+
+        flag = Flag(name, usage, value, str(value))
+        if name in self._formal:
+            if self.name == "":
+                msg = f"flag redefined: {name}"
+            else:
+                msg = f"{self.name} flag redefined: {name}"
+            panic(msg)
+        pos = self._undef.get(name, "")
+        if pos != "":
+            panic(f"flag {name} set at {pos} before being defined")
+        self._formal[name] = flag
 
 
 @dataclass
