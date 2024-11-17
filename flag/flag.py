@@ -765,19 +765,37 @@ def print_defaults() -> None:
     command_line.print_defaults()
 
 
-def usage() -> None:
+def default_usage() -> None:
     """
     Prints a usage message documenting all defined command-line flags
     to command_line's output, which by default is sys.stderr.
+    It is called when an error occurs while parsing flags.
 
-    Go's flag library intends for the developer to potentially override this
-    method, by assigning to flag.usage.
+    This function may be changed to point to a custom function by use of
+    the @usage decorator. By default it prints a simple header and calls
+    print_defaults(); for details about the format of the output and how to
+    control it, see the documentation for print_defaults. Custom usage
+    functions may choose to exit the program; by default existing happens
+    anyway as the command line's error handling strategy is set to
+    ErrorHandling.EXIT by default.
     """
 
-    # NOTE: usage is not just command_line.default_usage() because it serves
-    # as the example for how to write your own usage function.
     print(f"Usage of {sys.argv[0]}:\n", file=command_line.output)
     print_defaults()
+
+
+_usage = default_usage
+
+
+def usage(usage: Usage) -> Usage:
+    """
+    A function decorated with @usage will be called to document command-line
+    flags when an error occurs while parsing flags.
+    """
+    global _usage
+    _usage = usage
+
+    return usage
 
 
 def n_flag() -> int:
@@ -966,8 +984,4 @@ def init() -> None:
     # Note: This is not command_line.usage = usage, because go intends for
     # the user to overide/patch the value of usage within this module. This
     # allows for usage to be overridden after init is called.
-    command_line.usage = command_line_usage
-
-
-def command_line_usage() -> None:
-    usage()
+    command_line.usage = lambda: _usage()
