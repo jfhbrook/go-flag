@@ -12,6 +12,9 @@ __all__: List[str] = [
     # flag.error
     "Error",
     # flag.flag
+    "Func",
+    "Visitor",
+    "Usage",
     "Value",
     "ErrorHandling",
     "FlagSet",

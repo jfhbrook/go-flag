@@ -1,5 +1,7 @@
 from typing import Any, Dict, List
 
+import pytest
+
 from flag import (
     bool_,
     bool_func,
@@ -75,13 +77,15 @@ def test_everything(command_line, usage) -> None:
     assert is_sorted(flag_names), f"flag names are sorted: {flag_names}"
 
 
+@pytest.mark.todo
 def test_get(command_line, usage) -> None:
-    NotImplemented("test_get")
+    NotImplementedError("test_get")
 
 
 def _test_parse(command_line, usage) -> None:
-    NotImplemented("_test_parse")
+    NotImplementedError("_test_parse")
 
 
+@pytest.mark.todo
 def test_parse(command_line, usage) -> None:
     _test_parse(command_line, usage)

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 import inspect
 import sys
-from typing import Callable, Dict, IO, List, Optional, Tuple, TypeVar
+from typing import Callable, Dict, IO, List, Optional, Tuple
 
 from flag.error import Error
 from flag.fmt import errorf
@@ -35,8 +35,9 @@ def num_error(exc: Exception) -> Error:
     raise exc
 
 
-Func = Callable[[str]]
-ValueType = bool | int | str | float | time.Duration | Func
+Func = Callable[[str], None]
+Visitor = Callable[["Flag"], None]
+Usage = Callable[[], None]
 
 
 class Value[T](ABC):
@@ -151,7 +152,7 @@ class ErrorHandling(Enum):
 
 class FlagSet:
     def __init__(self, name: str, error_handling: ErrorHandling) -> None:
-        self.usage: Callable[[]] = usage
+        self.usage: Usage = usage
         # NOTE: In cases where go has defined private struct members and
         # public getters, I've opted to expose the properties as public.
         self.name: str = name
@@ -177,11 +178,11 @@ class FlagSet:
     def output(self, output: IO) -> None:
         self._output = output
 
-    def visit_all(self, fn: Callable[["Flag"]]) -> None:
+    def visit_all(self, fn: Visitor) -> None:
         for flag in sort_flags(self._formal):
             fn(flag)
 
-    def visit(self, fn: Callable[["Flag"]]) -> None:
+    def visit(self, fn: Visitor) -> None:
         for flag in sort_flags(self._actual):
             fn(flag)
 
@@ -388,7 +389,7 @@ def sort_flags(flags: Dict[str, Flag]) -> List[Flag]:
     return result
 
 
-def visit_all(fn: Callable[["Flag"]]) -> None:
+def visit_all(fn: Visitor) -> None:
     """
     Visits the command-line flags in lexicographical order, calling fn for
     each. It visits all flags, even those not set.
@@ -397,7 +398,7 @@ def visit_all(fn: Callable[["Flag"]]) -> None:
     command_line.visit_all(fn)
 
 
-def visit(fn: Callable[["Flag"]]) -> None:
+def visit(fn: Visitor) -> None:
     """
     Visits the command-line flags in lexicographical order, calling fn for
     each. It visits only those flags that have been set.
@@ -689,4 +690,12 @@ command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
 
 
 def init() -> None:
-    raise NotImplementedError("init")
+    global command_line
+    if not sys.argv:
+        command_line = FlagSet("", ErrorHandling.ExitOnError)
+    else:
+        command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
+    command_line.usage = command_line_usage
+
+
+command_line_usage = usage

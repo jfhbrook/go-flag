@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from typing import IO
 from unittest.mock import Mock
 
 import pytest
 
 import flag.flag as flag
-from flag.flag import ErrorHandling, FlagSet
+from flag.flag import command_line_usage, ErrorHandling, FlagSet
 from flag.flag import usage as usage_
 
 
 @pytest.fixture
 def default_usage():
-    return usage_
-
-
-@pytest.fixture
-def command_line_usage():
     return usage_
 
 
@@ -28,13 +24,15 @@ def usage(monkeypatch):
 
 
 @pytest.fixture
-def output():
+def output() -> IO:
     mock = Mock(name="MockIO")
     return mock
 
 
-def command_line(monkeypatch, command_line_usage, output) -> None:
+@pytest.fixture
+def command_line(monkeypatch, output) -> FlagSet:
     command_line = FlagSet(sys.argv[0], ErrorHandling.ContinueOnError)
     command_line.output = output
     command_line.usage = command_line_usage
     monkeypatch.setattr(flag, "command_line", command_line)
+    return command_line
