@@ -63,7 +63,7 @@ class Value[T](ABC):
         """
         pass
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         """
         Construct a string representation of a "zero value". This is used
         to determine whether or not the default value should be explicitly
@@ -92,7 +92,7 @@ class Value[T](ABC):
         method with the value.
         """
         if self.value.is_nil():
-            return self.zero()
+            return self.zero_str()
         return self.string(self.get())
 
     def string(self, value: T) -> str:
@@ -111,7 +111,7 @@ class BoolValue(Value[bool]):
         v: bool = strconv.parse_bool(string)
         self.value.set(v)
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         return "false"
 
     @property
@@ -131,7 +131,7 @@ class IntValue(Value[int]):
         v: int = int(string)
         self.value.set(v)
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         return "0"
 
 
@@ -143,7 +143,7 @@ class StringValue(Value[str]):
     def set(self, string: str) -> None:
         self.value.set(string)
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         return ""
 
 
@@ -156,7 +156,7 @@ class FloatValue(Value[float]):
         v: float = float(string)
         self.value.set(v)
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         return "0"
 
     def string(self, value: float) -> str:
@@ -177,7 +177,7 @@ class DurationValue(Value[datetime.timedelta]):
         v: datetime.timedelta = time.parse_duration(string)
         self.value.set(v)
 
-    def zero(self) -> str:
+    def zero_str(self) -> str:
         return str(time.Duration())
 
 
@@ -701,12 +701,12 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     uninitialized), convert it to a string and compare to the value. This
     strategy is very specific to go and its data types.
 
-    Here, we require that the Value type implements a zero() method which
-    returns the string representation of a zero value.
+    Here, we require that the Value type implements a zero_str() method which
+    returns the string representation of a zero_str value.
     """
 
     try:
-        return value == flag.value.zero()
+        return value == flag.value.zero_str()
     except Panic as exc:
         raise errorf(
             "exception while constructing zero {typ} for flag {name}",
