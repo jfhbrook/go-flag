@@ -13,9 +13,13 @@ from flag import (
     FlagSet,
     float_,
     func,
+    init,
     int_,
+    Ptr,
     set_,
     string,
+    Value,
+    var,
     visit,
     visit_all,
 )
@@ -154,3 +158,26 @@ def test_parse(command_line, usage) -> None:
 
 def test_flag_set_parse() -> None:
     _test_parse(FlagSet("test", ErrorHandling.ContinueOnError))
+
+
+class ListValue(Value[List[str]]):
+    def __init__(self) -> None:
+        self.value = Ptr([])
+
+    def set(self, string: str) -> None:
+        self.get().append(string)
+
+    def __str__(self) -> str:
+        return f"[{' '.join(self.get())}]"
+
+
+def test_user_defined(output) -> None:
+    flags = FlagSet("test", ErrorHandling.ContinueOnError)
+    flags.output = output
+
+    v = ListValue()
+    flags.var(v, "v", "usage")
+
+    flags.parse(["-v", "1", "-v", "2", "-v=3"])
+    assert len(v.get()) == 3, "expect 3 args"
+    assert str(v) == "[1 2 3]", "expected [1 2 3]"
