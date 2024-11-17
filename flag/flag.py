@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 import inspect
 import sys
-from typing import Callable, Dict, IO, List, Optional, Tuple
+from typing import Any, Callable, Dict, IO, List, NoReturn, Optional, Tuple
 
 from flag.error import Error
 from flag.fmt import errorf
@@ -157,7 +157,7 @@ class FlagSet:
         # NOTE: In cases where go has defined private struct members and
         # public getters, I've opted to expose the properties as public.
         self.name: str = name
-        self._parsed: bool = False
+        self.parsed: bool = False
         self._actual: Dict[str, Flag] = {}
         self._formal: Dict[str, Flag] = {}
         self.args: List[str] = []
@@ -386,6 +386,111 @@ class FlagSet:
         if pos != "":
             panic(f"flag {name} set at {pos} before being defined")
         self._formal[name] = flag
+
+    # Formats the message, prints it to output, and returns it
+    def sprintf(self, format_: str, *args: Any, **kwargs: Any) -> str:
+        msg = format_.format(*args, **kwargs)
+        print(msg, file=self.output)
+        return msg
+
+    # Prints to standard error a formatted error and usage message, and
+    # raises the error.
+    def failf(self, format_: str, *args: Any, **kwargs: Any) -> NoReturn:
+        msg = format_.format(*args, **kwargs)
+        self.usage()
+        raise Error(msg)
+
+    def parse_one(self) -> bool:
+        if not self.args:
+            return False
+        s = self.args[0]
+        if len(s) < 2 or s[0] != "-":
+            return False
+        num_minuses = 1
+        if s[1] == "-":
+            num_minuses += 1
+            if len(s) == 2:
+                self.args = self.args[1:]
+                return False
+        name = s[num_minuses:]
+        if not name or name[0] == "-" or name[0] == "=":
+            self.failf("bad flag syntax: {arg}", arg=s)
+        self.args = self.args[1:]
+        has_value = False
+        value = ""
+        for i in range(len(name)):
+            if name[i] == "=":
+                value = name[i + 1 :]
+                has_value = True
+                name = name[0:i]
+                break
+        if name not in self._formal:
+            # special case for nice help message.
+            if name == "help" or name == "h":
+                self.usage()
+                raise HelpError()
+            self.failf("flag provided but not defined: -{name}", name=name)
+
+        flag = self._formal[name]
+
+        # special case: doesn't need an arg
+        if flag.value.is_bool_flag:
+            if has_value:
+                try:
+                    flag.value.set(value)
+                except Error as exc:
+                    self.failf(
+                        "invalid boolean value {value} for -{name}: {exc}",
+                        value=value,
+                        name=name,
+                        exc=exc,
+                    )
+            else:
+                try:
+                    flag.value.set("true")
+                except Error as exc:
+                    self.failf(
+                        "invalid boolean flag {name}: {value}", name=name, value=value
+                    )
+        else:
+            # It must have a value, which might be the next argument.
+            if not has_value and self.args:
+                has_value = True
+                value = self.args[0]
+                self.args = self.args[1:]
+            if not has_value:
+                self.failf("flag needs an argument: -{name}", name=name)
+            try:
+                flag.value.set(value)
+            except Error as exc:
+                self.failf(
+                    "invalid value {value} for flag -{name}: {exc}",
+                    value=value,
+                    name=name,
+                    exc=exc,
+                )
+        self._actual[name] = flag
+        return True
+
+    def parse(self, arguments: List[str]) -> None:
+        self.parsed = True
+        self.args = arguments
+        while True:
+            try:
+                seen: bool = self.parse_one()
+                if seen:
+                    continue
+            except Error as exc:
+                if self.error_handling == ErrorHandling.ContinueOnError:
+                    # TODO: This is a bit of a wart...
+                    raise exc
+                elif self.error_handling == ErrorHandling.ExitOnError:
+                    if isinstance(exc, HelpError):
+                        sys.exit(0)
+                    sys.exit(2)
+                else:
+                    # TODO: Allow panic to take an exception
+                    panic(str(exc))
 
 
 @dataclass
@@ -685,16 +790,12 @@ def var(value: Value, name: str, usage: str) -> None:
     command_line.var(value, name, usage)
 
 
-def parse_one() -> None:
-    raise NotImplementedError("parse_one")
-
-
-def parse() -> bool:
+def parse() -> None:
     """
     Parses the command-line flags from sys.argv[1:]. Must be called after all
     flags are defined and before flags are accessed by the program.
     """
-    raise NotImplementedError("parse")
+    command_line.parse(sys.argv[1:])
 
 
 def parsed() -> bool:

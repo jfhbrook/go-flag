@@ -11,6 +11,7 @@ from flag import (
     float_,
     func,
     int_,
+    Panic,
     set_,
     string,
     visit,
@@ -101,6 +102,12 @@ def test_get(command_line, usage) -> None:
             assert ok, "visit: bad value at {v.get()} for {f.name}"
 
     visit_all(visitor)
+
+
+def test_usage(command_line, usage) -> None:
+    with pytest.raises(Panic):
+        command_line.parse(["-x"])
+    assert usage.called_once
 
 
 def _test_parse(command_line, usage) -> None:
