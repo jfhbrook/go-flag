@@ -21,12 +21,12 @@ sync:
 
 # Format with black and isort
 format:
-  uv run black ./flag ./tests
-  uv run isort --settings-file . ./flag ./tests
+  uv run black ./flag ./tests ./examples
+  uv run isort --settings-file . ./flag ./tests ./example
 
 # Lint with flake8
 lint:
-  uv run flake8 ./flag ./tests
+  uv run flake8 ./flag ./tests ./examples
   uv run validate-pyproject ./pyproject.toml
 
 # Check type annotations with pyright

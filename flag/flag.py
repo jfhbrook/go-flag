@@ -321,7 +321,7 @@ class FlagSet:
 
         def visitor(flag: Flag) -> None:
             b: List[str] = []
-            b += f"  s{flag.name}"
+            b += f"  -{flag.name}"
             name, usage = unquote_usage(flag)
             if name:
                 b += " "
@@ -345,8 +345,10 @@ class FlagSet:
                 is_zero_value_errs.append(exc)
             else:
                 if not is_zero:
-                    b += f" (default {flag.def_value}"
+                    b += f" (default {flag.def_value})"
             print("".join(b), file=self.output)
+
+        self.visit_all(visitor)
 
         if is_zero_value_errs:
             print("\n", file=self.output)
@@ -407,7 +409,7 @@ class FlagSet:
         """
         self.var(IntValue(value, p), name, usage)
 
-    def int(self, name: str, value: int, usage: str) -> Pointer[int]:
+    def int_(self, name: str, value: int, usage: str) -> Pointer[int]:
         """
         Defines an int flag with specified name, default value, and usage
         string. The return value is the value of the flag.
@@ -443,7 +445,7 @@ class FlagSet:
 
         self.var(FloatValue(value, p), name, usage)
 
-    def float(self, name: str, value: float, usage: str) -> Pointer[float]:
+    def float_(self, name: str, value: float, usage: str) -> Pointer[float]:
         """
         Defines a float flag with specified name, default value, and usage
         float. The return value is the value of the flag.
@@ -880,7 +882,7 @@ def int_(name: str, value: int, usage: str) -> Pointer[int]:
     string. The return value is the value of the flag.
     """
 
-    return command_line.int(name, value, usage)
+    return command_line.int_(name, value, usage)
 
 
 def string_var(p: Pointer[str], name: str, value: str, usage: str) -> None:
@@ -915,7 +917,7 @@ def float_(name: str, value: float, usage: str) -> Pointer[float]:
     string. The return value is the value of the flag.
     """
 
-    return command_line.float(name, value, usage)
+    return command_line.float_(name, value, usage)
 
 
 def duration_var(

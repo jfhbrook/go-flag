@@ -119,9 +119,9 @@ def _test_parse(f: FlagSet) -> None:
     assert not f.parsed, "f.parse should be false before parse"
     bool_flag = f.bool_("bool", False, "bool value")
     bool2_flag = f.bool_("bool2", False, "bool2 value")
-    int_flag = f.int("int", 0, "int value")
+    int_flag = f.int_("int", 0, "int value")
     string_flag = f.string("string", "0", "string value")
-    float_flag = f.float("float", 0.0, "float value")
+    float_flag = f.float_("float", 0.0, "float value")
     duration_flag = f.duration("duration", Duration(seconds=5), "time.Duration value")
     extra = "one-extra-argument"
     args: List[str] = [
