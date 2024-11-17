@@ -9,6 +9,7 @@ from flag import (
     Duration,
     Error,
     Flag,
+    FlagSet,
     float_,
     func,
     int_,
@@ -110,10 +111,42 @@ def test_usage(command_line, usage) -> None:
     usage.assert_called_once()
 
 
-def _test_parse(command_line, usage) -> None:
-    NotImplementedError("_test_parse")
+def _test_parse(f: FlagSet) -> None:
+    assert not f.parsed, "f.parse should be false before parse"
+    # TODO: These need to return pointers laul
+    bool_flag = f.bool("bool", False, "bool value")
+    bool2_flag = f.bool("bool2", False, "bool2 value")
+    int_flag = f.int("int", 0, "int value")
+    string_flag = f.string("string", "0", "string value")
+    float_flag = f.float("float", 0.0, "float value")
+    duration_flag = f.duration("duration", Duration(seconds=5), "time.Duration value")
+    extra = "one-extra-argument"
+    args: List[str] = [
+        "-bool",
+        "-bool2=true",
+        "--int",
+        "22",
+        "-string",
+        "hello",
+        "-float",
+        "2718e28",
+        "-duration",
+        "2m",
+        extra,
+    ]
+    f.parse(args)
+    assert f.parsed, "f.parse should be true after parse"
+    assert bool_flag.deref() == True, "bool flag should be true"
+    assert bool2_flag.deref() == True, "bool2 flag should be true"
+    assert int_flag.deref() == 22, "int flag should be 22"
+    assert string_flag.deref() == "hello", "string flag should be `hello`"
+    assert float_flag.deref() == 2718e28, "float flag should be 2718e28"
+    assert duration_flag.deref() == Duration(minutes=2), "duration flag should be 2m"
+    assert len(f.args) == 1, "expected one argument"
+    assert f.args[0] == extra, f"expected argument {extra}"
 
 
 @pytest.mark.skip
 def test_parse(command_line, usage) -> None:
-    _test_parse(command_line, usage)
+    usage.side_effect = Error.from_string("bad parse")
+    _test_parse(command_line)

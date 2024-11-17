@@ -293,14 +293,14 @@ class FlagSet:
         """
         self.var(BoolValue(value, p), name, usage)
 
-    def bool(self, name: str, value: bool, usage: str) -> bool:
+    def bool(self, name: str, value: bool, usage: str) -> Pointer[bool]:
         """
         Defines a bool flag with specified name, default value, and usage
         string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.bool_var(p, name, value, usage)
-        return p.deref()
+        return p
 
     def int_var(self, p: Pointer[int], name: str, value: int, usage: str) -> None:
         """
@@ -310,14 +310,14 @@ class FlagSet:
         """
         self.var(IntValue(value, p), name, usage)
 
-    def int(self, name: str, value: int, usage: str) -> int:
+    def int(self, name: str, value: int, usage: str) -> Pointer[int]:
         """
         Defines an int flag with specified name, default value, and usage
         string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.int_var(p, name, value, usage)
-        return p.deref()
+        return p
 
     def string_var(self, p: Pointer, name: str, value: str, usage: str) -> None:
         """
@@ -328,14 +328,14 @@ class FlagSet:
 
         self.var(StringValue(value, p), name, usage)
 
-    def string(self, name: str, value: str, usage: str) -> str:
+    def string(self, name: str, value: str, usage: str) -> Pointer[str]:
         """
         Defines a string flag with specified name, default value, and usage
         string. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.string_var(p, name, value, usage)
-        return p.deref()
+        return p
 
     def float_var(self, p: Pointer[float], name: str, value: float, usage: str) -> None:
         """
@@ -346,14 +346,14 @@ class FlagSet:
 
         self.var(FloatValue(value, p), name, usage)
 
-    def float(self, name: str, value: float, usage: str) -> float:
+    def float(self, name: str, value: float, usage: str) -> Pointer[float]:
         """
         Defines a float flag with specified name, default value, and usage
         float. The return value is the value of the flag.
         """
         p = Ptr(value)
         self.float_var(p, name, value, usage)
-        return p.deref()
+        return p
 
     def duration_var(
         self, p: Pointer[time.Duration], name: str, value: time.Duration, usage: str
@@ -366,7 +366,9 @@ class FlagSet:
 
         self.var(DurationValue(value, p), name, usage)
 
-    def duration(self, name: str, value: time.Duration, usage: str) -> time.Duration:
+    def duration(
+        self, name: str, value: time.Duration, usage: str
+    ) -> Pointer[time.Duration]:
         """
         Defines a duration flag with specified name, default value, and usage
         string. The return value is a go_ports.time.Duration, a subclass of
@@ -374,7 +376,7 @@ class FlagSet:
         """
         p = Ptr(value)
         self.duration_var(p, name, value, usage)
-        return p.deref()
+        return p
 
     def func(self, name: str, usage: str, fn: Func) -> None:
         """
@@ -714,7 +716,7 @@ def bool_var(p: Pointer[bool], name: str, value: bool, usage: str) -> None:
     command_line.var(BoolValue(value, p), name, usage)
 
 
-def bool_(name: str, value: bool, usage: str) -> bool:
+def bool_(name: str, value: bool, usage: str) -> Pointer[bool]:
     """
     Defines a bool flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -732,7 +734,7 @@ def int_var(p: Pointer[int], name: str, value: int, usage: str) -> None:
     command_line.var(IntValue(value, p), name, usage)
 
 
-def int_(name: str, value: int, usage: str) -> int:
+def int_(name: str, value: int, usage: str) -> Pointer[int]:
     """
     Defines an int flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -750,7 +752,7 @@ def string_var(p: Pointer[str], name: str, value: str, usage: str) -> None:
     command_line.var(StringValue(value, p), name, usage)
 
 
-def string(name: str, value: str, usage: str) -> str:
+def string(name: str, value: str, usage: str) -> Pointer[str]:
     """
     Defines a string flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -767,7 +769,7 @@ def float_var(p: Pointer[float], name: str, value: float, usage: str) -> None:
     command_line.var(FloatValue(value, p), name, usage)
 
 
-def float_(name: str, value: float, usage: str) -> float:
+def float_(name: str, value: float, usage: str) -> Pointer[float]:
     """
     Defines a float flag with the specified name, default value, and usage
     string. The return value is the value of the flag.
@@ -787,7 +789,7 @@ def duration_var(
     command_line.var(DurationValue(value, p), name, usage)
 
 
-def duration(name: str, value: time.Duration, usage: str) -> time.Duration:
+def duration(name: str, value: time.Duration, usage: str) -> Pointer[time.Duration]:
     """
     Defines a duration flag with specified name, default value, and usage
     string. The return value is a go_ports.time.Duration, a subclass of
