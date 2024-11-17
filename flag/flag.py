@@ -31,6 +31,16 @@ Visitor = Callable[["Flag"], None]
 Usage = Callable[[], None]
 
 
+def set_value(self: "Value", value: str) -> None:
+    """
+    Set a value, reifying ValueErrors into flag Errors.
+    """
+    try:
+        self.set(value)
+    except ValueError as exc:
+        raise ParseError from exc
+
+
 class Value[T](ABC):
     """
     Value is a class wrapping the dynamic value stored in a flag.
@@ -64,12 +74,8 @@ class BoolValue(Value[bool]):
         self.is_bool_flag = True
 
     def set(self, string: str) -> None:
-        try:
-            v: bool = strconv.parse_bool(string)
-        except ValueError as exc:
-            raise ParseError() from exc
-        else:
-            self.value.set(v)
+        v: bool = strconv.parse_bool(string)
+        self.value.set(v)
 
     def __str__(self) -> str:
         return strconv.format_bool(self.get())
@@ -77,12 +83,8 @@ class BoolValue(Value[bool]):
 
 class IntValue(Value[int]):
     def set(self, string: str) -> None:
-        try:
-            v: int = int(string)
-        except ValueError as exc:
-            raise ParseError() from exc
-        else:
-            self.value.set(v)
+        v: int = int(string)
+        self.value.set(v)
 
     def __str__(self) -> str:
         return str(self.get())
@@ -98,10 +100,7 @@ class StringValue(Value[str]):
 
 class FloatValue(Value[float]):
     def set(self, string: str) -> None:
-        try:
-            v: float = float(string)
-        except ValueError as exc:
-            raise ParseError() from exc
+        v: float = float(string)
         self.value.set(v)
 
     def __str__(self) -> str:
@@ -205,7 +204,7 @@ class FlagSet:
 
             raise errorf(f"No such flag -{name}")
         else:
-            flag.value.set(value)
+            set_value(flag.value, value)
             self._actual[name] = flag
 
     def print_defaults(self) -> None:
@@ -474,7 +473,7 @@ class FlagSet:
         if flag.value.is_bool_flag:
             if has_value:
                 try:
-                    flag.value.set(value)
+                    set_value(flag.value, value)
                 except Error as exc:
                     self.failf(
                         "invalid boolean value {value} for -{name}: {exc}",
@@ -484,7 +483,7 @@ class FlagSet:
                     )
             else:
                 try:
-                    flag.value.set("true")
+                    set_value(flag.value, "true")
                 except Error as exc:
                     self.failf(
                         "invalid boolean flag {name}: {value}", name=name, value=value
@@ -498,7 +497,7 @@ class FlagSet:
             if not has_value:
                 self.failf("flag needs an argument: -{name}", name=name)
             try:
-                flag.value.set(value)
+                set_value(flag.value, value)
             except Error as exc:
                 self.failf(
                     "invalid value {value} for flag -{name}: {exc}",
