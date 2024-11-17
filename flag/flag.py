@@ -219,7 +219,42 @@ class FlagSet:
         information.
         """
 
-        raise NotImplementedError("FlagSet#print_defaults")
+        is_zero_value_errs: List[Error] = []
+
+        def visitor(flag: Flag) -> None:
+            b: List[str] = []
+            b += f"  s{flag.name}"
+            name, usage = unquote_usage(flag)
+            if name:
+                b += " "
+                b += name
+            # Boolean flags of one ASCII letter are so common we treat them
+            # specially, putting their usage on the same line
+
+            if len(b) <= 4:
+                # space, '-', 'x'.
+                b += "\t"
+            else:
+                # Four spaces before the tab triggers good alignment for both
+                # 4- and 8-space tab stops.
+                b += "\n    \t"
+            b += usage.replace("\n", "\n    \t")
+
+            # Print the default value only if it differs from the zero value
+            # for this flag type.
+            try:
+                is_zero = is_zero_value(flag, flag.def_value)
+            except Error as exc:
+                is_zero_value_errs.append(exc)
+            else:
+                if not is_zero:
+                    b += f" (default {flag.def_value}"
+            print("".join(b), file=self.output)
+
+        if is_zero_value_errs:
+            print("\n", file=self.output)
+            for exc in is_zero_value_errs:
+                print(str(exc), file=self.output)
 
     def default_usage(self) -> None:
         if self.name == "":

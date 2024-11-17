@@ -30,9 +30,9 @@ def output() -> IO:
 
 
 @pytest.fixture
-def command_line(monkeypatch, output) -> FlagSet:
+def command_line(monkeypatch, usage, output) -> FlagSet:
     command_line = FlagSet(sys.argv[0], ErrorHandling.ContinueOnError)
     command_line.output = output
-    command_line.usage = command_line_usage
+    command_line.usage = usage
     monkeypatch.setattr(flag, "command_line", command_line)
     return command_line

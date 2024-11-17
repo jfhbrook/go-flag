@@ -7,11 +7,11 @@ from flag import (
     bool_func,
     duration,
     Duration,
+    Error,
     Flag,
     float_,
     func,
     int_,
-    Panic,
     set_,
     string,
     visit,
@@ -105,9 +105,9 @@ def test_get(command_line, usage) -> None:
 
 
 def test_usage(command_line, usage) -> None:
-    with pytest.raises(Panic):
+    with pytest.raises(Error):
         command_line.parse(["-x"])
-    assert usage.called_once
+    usage.assert_called_once()
 
 
 def _test_parse(command_line, usage) -> None:
