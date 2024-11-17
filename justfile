@@ -13,7 +13,7 @@ default:
 
 # Sync project
 sync:
-  uv sync
+  uv sync --all-extras
 
 #
 # Development tooling - linting, formatting, etc
