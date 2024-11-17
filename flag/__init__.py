@@ -126,13 +126,14 @@ from flag.flag import (
 )
 from flag.flag import n_arg as _n_arg
 from flag.flag import n_flag as _n_flag
+import flag.zero as zero
 
 
 def __getattr__(name: str) -> int:
     if name == "n_flag":
         return _n_flag()
     elif name == "n_arg":
-        return _n_flag()
+        return _n_arg()
     else:
         raise ImportError(f"cannot import name '{name}' from 'flag' ({__file__})")
 
@@ -187,6 +188,8 @@ __all__: List[str] = [
     # flag.time
     "Duration",
     "parse_duration",
+    # flag.zero
+    "zero",
     # properties
     "__getattr__",
 ]
