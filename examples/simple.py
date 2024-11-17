@@ -2,14 +2,18 @@
 
 import flag
 
-bool_flag = flag.bool_("bool", False, "bool value")
-int_flag = flag.int_("int", 0, "int value")
-string_flag = flag.string("string", "0", "string value")
-float_flag = flag.float_("float", 0.0, "float value")
+force = flag.bool_("force", False, "force the command to execute")
+count = flag.int_("count", 1, "a count")
+name = flag.string("name", "Josh", "a name")
+threshold = flag.float_("threshold", 1.0, "a threshold")
 
 flag.parse()
 
-print("bool", bool_flag.deref())
-print("int", int_flag.deref())
-print("string", string_flag.deref())
-print("float", float_flag.deref())
+print(
+    dict(
+        force=force.deref(),
+        count=count.deref(),
+        name=name.deref(),
+        threshold=threshold.deref(),
+    )
+)

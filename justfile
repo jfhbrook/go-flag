@@ -13,11 +13,16 @@ default:
 
 # Sync project
 sync:
-  uv sync --all-extras
+  uv sync --extra dev
+  uv pip install -e .
 
 #
 # Development tooling - linting, formatting, etc
 #
+
+# Run a command or script
+run *argv:
+  uv run {{ argv }}
 
 # Format with black and isort
 format:
