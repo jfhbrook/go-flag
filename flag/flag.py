@@ -639,8 +639,7 @@ class FlagSet:
                         sys.exit(0)
                     sys.exit(2)
                 else:
-                    # TODO: Allow panic to take an exception
-                    panic(str(exc))
+                    panic(str(exc), exc=exc)
 
 
 @dataclass

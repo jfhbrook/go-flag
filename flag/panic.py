@@ -1,4 +1,4 @@
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 
 class Panic(Exception):
@@ -9,9 +9,13 @@ class Panic(Exception):
     pass
 
 
-def panic(message: str) -> NoReturn:
+def panic(message: str, exc: Optional[Exception] = None) -> NoReturn:
     """
     Panic!
     """
 
-    raise Panic(message)
+    panic = Panic(message)
+
+    if exc:
+        raise panic from exc
+    raise panic
