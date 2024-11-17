@@ -1,3 +1,5 @@
+import re
+
 from flag.error import Error
 import flag.time as time
 
@@ -20,24 +22,8 @@ def format_bool(b: bool) -> str:
     return "false"
 
 
-def parse_int(s: str, base: int = 10) -> int:
-    raise NotImplementedError("parse_int")
-
-
-def format_int(i: int, base: int = 10) -> str:
-    raise NotImplementedError("format_int")
-
-
-def itoa(i: int) -> str:
-    return format_int(i, 10)
-
-
-def parse_float(s: str) -> float:
-    raise NotImplementedError("parse_float")
-
-
-def format_float(f: float, fmt: str, prec: int) -> str:
-    raise NotImplementedError("format_float")
+def format_float(f: float) -> str:
+    return re.sub(r"\.0*$", "", str(f))
 
 
 def format_duration(delta: time.Duration) -> str:

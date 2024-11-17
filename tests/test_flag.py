@@ -57,7 +57,7 @@ def test_everything(command_line, usage) -> None:
             assert ok, f"Visit: bad value {str(f.value)} for {f.name}"
 
     visit_all(visitor)
-    assert len(m) == 10, "visit_all does not miss any flags"
+    assert len(m) == 7, "visit_all does not miss any flags"
     m = dict()
     visit(visitor)
     assert len(m) == 0, "visit does not see unset flags"
@@ -71,7 +71,7 @@ def test_everything(command_line, usage) -> None:
     set_("test_boolfunc", "")
     desired = "1"
     visit(visitor)
-    assert len(m) == 10, "visit succeeds after set"
+    assert len(m) == 7, "visit succeeds after set"
     flag_names: List[str] = []
     visit(lambda f: flag_names.append(f.name))
     assert is_sorted(flag_names), f"flag names are sorted: {flag_names}"

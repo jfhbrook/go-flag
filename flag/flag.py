@@ -84,14 +84,14 @@ class BoolValue(Value[bool]):
 class IntValue(Value[int]):
     def set(self, string: str) -> None:
         try:
-            v: int = strconv.parse_int(string)
+            v: int = int(string)
         except Error as exc:
             raise num_error(exc) from exc
         else:
             self.value.set(v)
 
     def __str__(self) -> str:
-        return strconv.itoa(self.get())
+        return str(self.get())
 
 
 class StringValue(Value[str]):
@@ -104,11 +104,11 @@ class StringValue(Value[str]):
 
 class FloatValue(Value[float]):
     def set(self, string: str) -> None:
-        v: float = strconv.parse_float(string)
+        v: float = float(string)
         self.value.set(v)
 
     def __str__(self) -> str:
-        return strconv.format_float(self.get(), "g", -1)
+        return strconv.format_float(self.get())
 
 
 class DurationValue(Value[time.Duration]):
