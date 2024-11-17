@@ -83,7 +83,7 @@ _clean-build:
 
 # Tag the release in git
 tag:
-  uv run git tag -a "$(python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')" -m "Release $(python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')"
+  git tag -a "$(uv run python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')" -m "Release $(uv run python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')"
 
 # Publish the release
 publish: build

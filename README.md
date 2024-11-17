@@ -147,7 +147,7 @@ well.
 
 I developed this project using [uv](https://docs.astral.sh/uv/). It is a little
 immature, and I honestly can't recommend it yet for production use. We will
-see if I stick with this stack when I attempt to publish to PyPI.
+see if I stick with this stack over time.
 
 Nevertheless, the `justfile` should contain most of what you need - including
 `just format`, `just lint`, `just check`, and `just test`. Note that type

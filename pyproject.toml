@@ -35,6 +35,7 @@ dev = [
   "mkdocs",
   "mkdocs-bootstrap386",
   "mkdocstrings[python]",
+  "toml",
   "validate-pyproject[all]",
 ]
 
