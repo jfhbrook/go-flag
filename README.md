@@ -5,6 +5,9 @@ to Python.
 
 ## Status
 
-The general shape of [the package](https://github.com/golang/go/blob/master/src/flag/flag_test.go)
-is in place, but crucial methods are unimplemented. I'll be implementing them
-as I port [the tests](https://github.com/golang/go/blob/master/src/flag/flag_test.go).
+Enough tests are in place that I'm confident in calling this code complete - or
+at least complete enough to start using it and backfill tests as I break
+things.
+
+I still need to clean up docstrings and publish, but otherwise this is looking
+pretty good!
