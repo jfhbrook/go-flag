@@ -33,6 +33,7 @@ format:
 lint:
   uv run flake8 ./flag ./tests ./examples
   uv run validate-pyproject ./pyproject.toml
+  shellcheck ./scripts/*.sh
 
 # Check type annotations with pyright
 check:
@@ -84,13 +85,9 @@ _clean-build:
 tag:
   uv run git tag -a "$(python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')" -m "Release $(python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')"
 
-# Upload built packages
-upload:
-  # TODO: Does uv do this?
-  uv run twine upload dist/*
-
-# Build the package and publish it to PyPI
-publish: build upload
+# Publish the release
+publish: build
+  ./scripts/publish.sh
 
 # Clean up loose files
 clean: _clean-test
