@@ -13,7 +13,6 @@ from flag import (
     FlagSet,
     float_,
     func,
-    init,
     int_,
     Ptr,
     set_,

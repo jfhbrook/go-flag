@@ -6,8 +6,6 @@ from flag.panic import *
 from flag.pointer import *
 from flag.time import *
 
-init()
-
 __all__: List[str] = [
     # flag.error
     "Error",
@@ -46,7 +44,6 @@ __all__: List[str] = [
     "parse",
     "parsed",
     "command_line",
-    "init",
     # flag.panic
     "Panic",
     # flag.pointer

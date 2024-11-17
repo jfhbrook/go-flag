@@ -964,24 +964,13 @@ def parsed() -> bool:
     raise NotImplementedError("parsed")
 
 
+# In go, they account for the possibility of os.Args being empty. But in
+# my experimentation, Python *always* sets the first argument to the name
+# of the script, or the empty string when executing from the REPL.
 command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
 
-
-def init() -> None:
-    """
-    Go defines a function called "init" in the package, which is executed
-    when the package is first imported. This is analogous to the behavior of
-    __init__.py in Python packages. In fact, this function is called by this
-    package's __init__.py.
-    """
-    global command_line
-
-    # In go, they account for the possibility of os.Args being empty. But in
-    # my experimentation, Python *always* sets the first argument to the name
-    # of the script, or the empty string when executing from the REPL.
-    command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
-    # Override generic FlagSet default usage with call to global usage.
-    # Note: This is not command_line.usage = usage, because go intends for
-    # the user to overide/patch the value of usage within this module. This
-    # allows for usage to be overridden after init is called.
-    command_line.usage = lambda: _usage()
+# Override generic FlagSet default usage with call to global usage.
+# Note: This is not command_line.usage = usage, because go intends for
+# the user to overide/patch the value of usage within this module. This
+# allows for usage to be overridden after init is called.
+command_line.usage = lambda: _usage()
