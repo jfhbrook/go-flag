@@ -230,14 +230,14 @@ class FlagSet:
     def lookup(self, name: str) -> "Flag":
         return self._formal[name]
 
-    def set(self, name: str, value: str) -> None:
+    def set_(self, name: str, value: str) -> None:
         try:
             flag = self._formal[name]
         except KeyError:
             # Remember that a flag that isn't defined is being set.
             # We raise an exception in this case, but in addition if
             # subsequently that flag is defined, we want to panic
-            # at the definition point.
+            # at the definition point (in the var method).
             # This is a problem which occurs if both the definition
             # and the set call are in init code and for whatever
             # reason the init code changes evaluation order.
@@ -624,7 +624,7 @@ def set_(name: str, value: str) -> None:
     Sets the value of the named command-line flag.
     """
 
-    command_line.set(name, value)
+    command_line.set_(name, value)
 
 
 def is_zero_value(flag: "Flag", value: str) -> bool:
