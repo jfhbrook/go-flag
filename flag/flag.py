@@ -26,10 +26,6 @@ HelpError = Error.from_string("flag: help requested")
 # more information.
 ParseError = Error.from_string("parse error")
 
-# RangeError is raised by set if a flag's value is out of range. It then gets
-# wrapped through failf to provide more information.
-RangeError = Error.from_string("value out of range")
-
 
 def num_error(exc: Exception) -> Error:
     if isinstance(exc, strconv.SyntaxError):

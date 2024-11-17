@@ -3,7 +3,6 @@ import re
 from flag.error import Error
 import flag.time as time
 
-RangeError = Error.from_string("value out of range")
 SyntaxError = Error.from_string("invalid syntax")
 
 

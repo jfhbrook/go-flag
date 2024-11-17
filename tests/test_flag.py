@@ -237,10 +237,9 @@ def test_parse_error() -> None:
     pass
 
 
-# Tests for specific behavior if int flag is bigger than an i64
-@pytest.mark.skip
-def test_range_error() -> None:
-    pass
+# As far as I can tell, Python's ints aren't sensitive to under/overflow - I
+# created arbitrarily long ints in the repl and was not able to trigger an
+# error analogous to a range error.
 
 
 # In go's test suite, this calls a subprocess - yikes!
