@@ -107,6 +107,10 @@ class Value[T](ABC):
 
 
 class BoolValue(Value[bool]):
+    """
+    A boolean value.
+    """
+
     def set(self, string: str) -> None:
         v: bool = strconv.parse_bool(string)
         self.value.set(v)
@@ -123,6 +127,10 @@ class BoolValue(Value[bool]):
 
 
 class IntValue(Value[int]):
+    """
+    An int value.
+    """
+
     def set(self, string: str) -> None:
         v: int = int(string)
         self.value.set(v)
@@ -132,6 +140,10 @@ class IntValue(Value[int]):
 
 
 class StringValue(Value[str]):
+    """
+    A string value.
+    """
+
     def set(self, string: str) -> None:
         self.value.set(string)
 
@@ -140,6 +152,10 @@ class StringValue(Value[str]):
 
 
 class FloatValue(Value[float]):
+    """
+    A float value.
+    """
+
     def set(self, string: str) -> None:
         v: float = float(string)
         self.value.set(v)
@@ -152,6 +168,15 @@ class FloatValue(Value[float]):
 
 
 class DurationValue(Value[datetime.timedelta]):
+    """
+    A Duration value. Duration is a subclass of datetime.timedelta, and
+    this value is in fact typed as a datetime.timedelta.
+
+    The difference is that str() called on a Duration will have output similar
+    to go's time.Duration. To strip this behavior, call Duration.to_timedelta
+    on the result.
+    """
+
     def set(self, string: str) -> None:
         v: datetime.timedelta = time.parse_duration(string)
         self.value.set(v)
@@ -186,13 +211,36 @@ class BoolFuncValue(FuncValue):
 
 
 class ErrorHandling(Enum):
-    RaiseOnError = 0
-    ExitOnError = 1
-    PanicOnError = 2
+    """
+    This enum defines how FlagSet#parse behaves if the parse fails:
+
+    ErrorHandling.RAISE  Raise a descriptive Error.
+    ErrorHandling.EXIT   Call sys.exit(2) or for -h/-help sys.exit(0).
+    ErrorHandling.PANIC  Call panic with a descriptive error.
+    """
+
+    RAISE = 0
+    EXIT = 1
+    PANIC = 2
 
 
 class FlagSet:
-    def __init__(self, name: str, error_handling: ErrorHandling) -> None:
+    def __init__(
+        self, name: str, error_handling: ErrorHandling = ErrorHandling.RAISE
+    ) -> None:
+        """
+        A FlagSet represents a set of defined flags. By default, a FlagSet
+        has RAISE error handling.
+
+        Flag names must be unique within a FlagSet. An attempt to define a flag
+        whose name is already in use will cause a panic.
+
+        Usage is the function called when an error occurs while parsing flags.
+        The field is a function (not a method) that may be changed to point
+        to a custom error handler. What happens after usage is called depends
+        on the ErrorHandling setting: for the command line, this defaults to
+        ErrorHandling.EXIT, which exits the program after calling usage.
+        """
         self.usage: Usage = usage
         # NOTE: In cases where go has defined private struct members and
         # public getters, I've opted to expose the properties as public.
@@ -200,9 +248,12 @@ class FlagSet:
         self.parsed: bool = False
         self._actual: Dict[str, Flag] = {}
         self._formal: Dict[str, Flag] = {}
+        # arguments after flags
         self.args: List[str] = []
         self.error_handling = error_handling
+        # output property getter will return stderr if otherwise unset
         self._output: Optional[IO] = None
+        # flags which dodn't exist at the time of set_
         self._undef: Dict[str, str] = {}
 
     # NOTE: In go, these methods are defined inline with other functions.
@@ -561,9 +612,9 @@ class FlagSet:
                     continue
                 break
             except Error as exc:
-                if self.error_handling == ErrorHandling.RaiseOnError:
+                if self.error_handling == ErrorHandling.RAISE:
                     raise exc
-                elif self.error_handling == ErrorHandling.ExitOnError:
+                elif self.error_handling == ErrorHandling.EXIT:
                     if isinstance(exc, HelpError):
                         sys.exit(0)
                     sys.exit(2)
@@ -576,6 +627,11 @@ class FlagSet:
 class Flag:
     """
     Represents the state of a flag.
+
+    name       name as it appears on command line
+    usage      help message
+    value      value as set
+    def_value  default value (as text); for usage message
     """
 
     name: str
@@ -584,7 +640,7 @@ class Flag:
     def_value: str
 
 
-# Returns the flags as a slice in lexicographical sorted order.
+# Returns the flags as a list in lexicographical sorted order.
 def sort_flags(flags: Dict[str, Flag]) -> List[Flag]:
     result: List[Flag] = list(flags.values())
     result.sort(key=lambda f: f.name)
@@ -876,15 +932,15 @@ def parsed() -> bool:
     raise NotImplementedError("parsed")
 
 
-command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
+command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
 
 
 def init() -> None:
     global command_line
     if not sys.argv:
-        command_line = FlagSet("", ErrorHandling.ExitOnError)
+        command_line = FlagSet("", ErrorHandling.EXIT)
     else:
-        command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
+        command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
     command_line.usage = command_line_usage
 
 

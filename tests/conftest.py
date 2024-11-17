@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 
 import flag.flag as flag
-from flag.flag import command_line_usage, ErrorHandling, FlagSet
+from flag.flag import ErrorHandling, FlagSet
 from flag.flag import usage as usage_
 
 
@@ -31,7 +31,7 @@ def output() -> IO:
 
 @pytest.fixture
 def command_line(monkeypatch, usage, output) -> FlagSet:
-    command_line = FlagSet(sys.argv[0], ErrorHandling.RaiseOnError)
+    command_line = FlagSet(sys.argv[0], ErrorHandling.RAISE)
     command_line.output = output
     command_line.usage = usage
     monkeypatch.setattr(flag, "command_line", command_line)
