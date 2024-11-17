@@ -147,7 +147,7 @@ class BoolFuncValue(FuncValue):
 
 
 class ErrorHandling(Enum):
-    ContinueOnError = 0
+    RaiseOnError = 0
     ExitOnError = 1
     PanicOnError = 2
 
@@ -523,8 +523,7 @@ class FlagSet:
                     continue
                 break
             except Error as exc:
-                if self.error_handling == ErrorHandling.ContinueOnError:
-                    # TODO: This is a bit of a wart...
+                if self.error_handling == ErrorHandling.RaiseOnError:
                     raise exc
                 elif self.error_handling == ErrorHandling.ExitOnError:
                     if isinstance(exc, HelpError):

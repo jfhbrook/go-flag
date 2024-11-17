@@ -156,7 +156,7 @@ def test_parse(command_line, usage) -> None:
 
 
 def test_flag_set_parse() -> None:
-    _test_parse(FlagSet("test", ErrorHandling.ContinueOnError))
+    _test_parse(FlagSet("test", ErrorHandling.RaiseOnError))
 
 
 class ListValue(Value[List[str]]):
@@ -171,7 +171,7 @@ class ListValue(Value[List[str]]):
 
 
 def test_user_defined(output) -> None:
-    flags = FlagSet("test", ErrorHandling.ContinueOnError)
+    flags = FlagSet("test", ErrorHandling.RaiseOnError)
     flags.output = output
 
     v = ListValue()
