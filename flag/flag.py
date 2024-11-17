@@ -241,7 +241,7 @@ class FlagSet:
         on the ErrorHandling setting: for the command line, this defaults to
         ErrorHandling.EXIT, which exits the program after calling usage.
         """
-        self.usage: Usage = usage
+        self.usage: Usage = self.default_usage
         # NOTE: In cases where go has defined private struct members and
         # public getters, I've opted to expose the properties as public.
         self.name: str = name
@@ -282,6 +282,13 @@ class FlagSet:
         return self._formal[name]
 
     def set_(self, name: str, value: str) -> None:
+        # We call into an underlying method so that the inspected stack has
+        # the same number of layers whether we're calling the method on
+        # FlagSet or the global set_ function. It's extremely dastardly,
+        # and surprisingly the go source doesn't document it.
+        return self._set(name, value)
+
+    def _set(self, name: str, value: str) -> None:
         try:
             flag = self._formal[name]
         except KeyError:
@@ -292,9 +299,13 @@ class FlagSet:
             # This is a problem which occurs if both the definition
             # and the set call are in init code and for whatever
             # reason the init code changes evaluation order.
+            #
+            # This edge case may not be relevant to Python, but nevertheless
+            # we retain the behavior - for now.
 
-            # TODO: This index is probably wrong
-            info = inspect.stack()[0]
+            # TODO: Is this inspecting enough frames out of the stack? Go
+            # doesn't have a try/except context to contend with.
+            info = inspect.stack()[2]
             self._undef[name] = f"{info.filename}:{info.lineno}"
 
             raise errorf(f"No such flag -{name}")
@@ -679,7 +690,7 @@ def set_(name: str, value: str) -> None:
     Sets the value of the named command-line flag.
     """
 
-    command_line.set_(name, value)
+    command_line._set(name, value)
 
 
 def is_zero_value(flag: "Flag", value: str) -> bool:
@@ -754,14 +765,17 @@ def print_defaults() -> None:
     command_line.print_defaults()
 
 
-# NOTE: usage is not just command_line.default_usage() because it serves
-# as the example for how to write your own usage function.
 def usage() -> None:
     """
     Prints a usage message documenting all defined command-line flags
     to command_line's output, which by default is sys.stderr.
+
+    Go's flag library intends for the developer to potentially override this
+    method, by assigning to flag.usage.
     """
 
+    # NOTE: usage is not just command_line.default_usage() because it serves
+    # as the example for how to write your own usage function.
     print(f"Usage of {sys.argv[0]}:\n", file=command_line.output)
     print_defaults()
 
@@ -936,12 +950,24 @@ command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
 
 
 def init() -> None:
+    """
+    Go defines a function called "init" in the package, which is executed
+    when the package is first imported. This is analogous to the behavior of
+    __init__.py in Python packages. In fact, this function is called by this
+    package's __init__.py.
+    """
     global command_line
-    if not sys.argv:
-        command_line = FlagSet("", ErrorHandling.EXIT)
-    else:
-        command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
+
+    # In go, they account for the possibility of os.Args being empty. But in
+    # my experimentation, Python *always* sets the first argument to the name
+    # of the script, or the empty string when executing from the REPL.
+    command_line = FlagSet(sys.argv[0], ErrorHandling.EXIT)
+    # Override generic FlagSet default usage with call to global usage.
+    # Note: This is not command_line.usage = usage, because go intends for
+    # the user to overide/patch the value of usage within this module. This
+    # allows for usage to be overridden after init is called.
     command_line.usage = command_line_usage
 
 
-command_line_usage = usage
+def command_line_usage() -> None:
+    usage()
