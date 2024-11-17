@@ -82,6 +82,9 @@ class Ptr[V](Pointer):
     def is_nil(self) -> bool:
         return self.value is None
 
+    def __str__(self) -> str:
+        return f"Ptr({self.value})"
+
 
 class AttrRef[V](Pointer):
     """
@@ -141,6 +144,13 @@ class AttrRef[V](Pointer):
 
         return False
 
+    def __str__(self) -> str:
+        if self.is_nil():
+            value = None
+        else:
+            value = getattr(self.obj, self.name)
+        return f"AttrRef({self.name}={value})"
+
 
 class KeyRef[V](Pointer):
     """
@@ -188,3 +198,6 @@ class KeyRef[V](Pointer):
 
     def is_nil(self) -> bool:
         return self.dict_.get(self.key, None) is None
+
+    def __str__(self) -> str:
+        return f"KeyRef({self.key}={self.dict_.get(self.key, None)})"
