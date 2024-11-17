@@ -8,7 +8,7 @@ import datetime
 from enum import Enum
 import inspect
 import sys
-from typing import Any, Callable, Dict, IO, List, NoReturn, Optional, Tuple
+from typing import Any, Callable, cast, Dict, IO, List, NoReturn, Optional, Tuple
 
 from flag.error import Error
 from flag.fmt import errorf
@@ -586,9 +586,13 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     construct a zero value for that type, convert it to a string and compare to
     the string value. This package is very specific to go and its data types.
 
-    Instead, we check the instance type of flag.value (which is a subclass
-    of Value). This means the function is much less sophisticated. But it
-    should suffice for our needs.
+    Here, we first check the instance type of flag.value (which is a subclass
+    of value). Then, for user-supplied Value instances, we attempt to construct
+    a "zero value" by calling the value's class's constructor with no
+    arguments. In cases where the value does take arguments, this will fail.
+
+    TODO: Should the Value interface include a zero() that constructs a
+    "zero value" for the underlying type?
     """
 
     if isinstance(flag.value, BoolValue):
@@ -602,11 +606,14 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     elif isinstance(flag.value, DurationValue):
         return value == str(time.Duration())
     else:
-        raise errorf(
-            "can not construct zero {t} for flag {f}",
-            t=type(flag.value.get()),
-            f=flag.name,
-        )
+        try:
+            return value == str(cast(Any, flag.value.__class__)())
+        except Exception as exc:
+            raise errorf(
+                "can not construct zero {t} for flag {f}",
+                t=type(flag.value.get()),
+                f=flag.name,
+            ) from exc
 
 
 def unquote_usage(flag: "Flag") -> Tuple[str, str]:
