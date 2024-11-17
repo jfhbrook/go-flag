@@ -231,7 +231,6 @@ class FlagSet:
                 b += name
             # Boolean flags of one ASCII letter are so common we treat them
             # specially, putting their usage on the same line
-
             if len(b) <= 4:
                 # space, '-', 'x'.
                 b += "\t"
