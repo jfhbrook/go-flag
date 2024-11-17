@@ -1,9 +1,6 @@
 import re
 
-from flag.error import Error
 import flag.time as time
-
-SyntaxError = Error.from_string("invalid syntax")
 
 
 def parse_bool(string: str) -> bool:
@@ -12,7 +9,7 @@ def parse_bool(string: str) -> bool:
     elif string in {"0", "f", "F", "FALSE", "false", "False"}:
         return False
 
-    raise SyntaxError()
+    raise ValueError("invalid syntax")
 
 
 def format_bool(b: bool) -> str:

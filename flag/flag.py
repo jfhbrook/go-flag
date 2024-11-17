@@ -26,13 +26,6 @@ HelpError = Error.from_string("flag: help requested")
 # more information.
 ParseError = Error.from_string("parse error")
 
-
-def num_error(exc: Exception) -> Error:
-    if isinstance(exc, strconv.SyntaxError):
-        raise ParseError() from exc
-    raise exc
-
-
 Func = Callable[[str], None]
 Visitor = Callable[["Flag"], None]
 Usage = Callable[[], None]
@@ -71,8 +64,12 @@ class BoolValue(Value[bool]):
         self.is_bool_flag = True
 
     def set(self, string: str) -> None:
-        v: bool = strconv.parse_bool(string)
-        self.value.set(v)
+        try:
+            v: bool = strconv.parse_bool(string)
+        except ValueError as exc:
+            raise ParseError() from exc
+        else:
+            self.value.set(v)
 
     def __str__(self) -> str:
         return strconv.format_bool(self.get())
@@ -82,8 +79,8 @@ class IntValue(Value[int]):
     def set(self, string: str) -> None:
         try:
             v: int = int(string)
-        except Error as exc:
-            raise num_error(exc) from exc
+        except ValueError as exc:
+            raise ParseError() from exc
         else:
             self.value.set(v)
 
@@ -101,7 +98,10 @@ class StringValue(Value[str]):
 
 class FloatValue(Value[float]):
     def set(self, string: str) -> None:
-        v: float = float(string)
+        try:
+            v: float = float(string)
+        except ValueError as exc:
+            raise ParseError() from exc
         self.value.set(v)
 
     def __str__(self) -> str:
