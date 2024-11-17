@@ -2,17 +2,17 @@ from typing import Any, Dict, List
 
 from flag import (
     bool_,
-    int_,
-    string,
-    float_,
-    duration,
-    func,
     bool_func,
+    duration,
     Duration,
     Flag,
-    visit_all,
-    visit,
+    float_,
+    func,
+    int_,
     set_,
+    string,
+    visit,
+    visit_all,
 )
 
 
@@ -23,10 +23,10 @@ def bool_string(s: str) -> str:
 
 
 def is_sorted(xs: List[Any]) -> bool:
-    return all(xs[i] <= xs[i+1] for i in range(len(xs) - 1))
+    return all(xs[i] <= xs[i + 1] for i in range(len(xs) - 1))
 
 
-def test_everything() -> None:
+def test_everything(command_line, usage) -> None:
     bool_("test_bool", False, "bool value")
     int_("test_int", 0, "int value")
     string("test_string", "0", "string value")
@@ -37,6 +37,7 @@ def test_everything() -> None:
 
     m: Dict[str, Flag] = dict()
     desired = "0"
+
     def visitor(f: Flag) -> None:
         if len(f.name) > 5 and f.name[0:5] == "test_":
             m[f.name] = f
@@ -52,6 +53,7 @@ def test_everything() -> None:
             elif f.name == "test_boolfunc" and str(f.value) == "":
                 ok = True
             assert ok, f"Visit: bad value {str(f.value)} for {f.name}"
+
     visit_all(visitor)
     assert len(m) == 10, "visit_all does not miss any flags"
     m = dict()
@@ -73,12 +75,13 @@ def test_everything() -> None:
     assert is_sorted(flag_names), f"flag names are sorted: {flag_names}"
 
 
-def test_get() -> None:
+def test_get(command_line, usage) -> None:
     NotImplemented("test_get")
 
 
-def _test_parse() -> None:
+def _test_parse(command_line, usage) -> None:
     NotImplemented("_test_parse")
 
 
-def test_parse() -> None:
+def test_parse(command_line, usage) -> None:
+    _test_parse(command_line, usage)

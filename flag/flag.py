@@ -690,23 +690,3 @@ command_line = FlagSet(sys.argv[0], ErrorHandling.ExitOnError)
 
 def init() -> None:
     raise NotImplementedError("init")
-
-
-def command_line_usage() -> None:
-    usage()
-
-
-# TODO: Move all of this to conftest
-from unittest.mock import Mock
-
-default_usage = usage
-
-
-def reset_for_testing(usage_: Callable[[], None]) -> None:
-    global command_line
-    global usage
-
-    command_line = FlagSet(sys.argv[0], ErrorHandling.ContinueOnError)
-    command_line.output = Mock(name="MockIO")
-    command_line.usage = command_line_usage
-    usage = usage_
