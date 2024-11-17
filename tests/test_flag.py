@@ -181,3 +181,90 @@ def test_user_defined(output) -> None:
     flags.parse(["-v", "1", "-v", "2", "-v=3"])
     assert len(v.get()) == 3, "expect 3 args"
     assert str(v) == "[1 2 3]", "expected [1 2 3]"
+
+
+@pytest.mark.skip
+def test_user_defined_func() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_user_defined_for_command_line() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_user_defined_bool() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_user_defined_bool_usage() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_set_output() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_changing_args() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_help() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_print_defaults() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_usage_output() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_getters() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_parse_error() -> None:
+    pass
+
+
+# Tests for specific behavior if int flag is bigger than an i64
+@pytest.mark.skip
+def test_range_error() -> None:
+    pass
+
+
+# In go's test suite, this calls a subprocess - yikes!
+@pytest.mark.skip
+def test_exit_code() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_invalid_flags() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_redefined_flags() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_user_defined_bool_func() -> None:
+    pass
+
+
+@pytest.mark.skip
+def test_define_after_set() -> None:
+    pass
