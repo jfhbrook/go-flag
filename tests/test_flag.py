@@ -79,7 +79,29 @@ def test_everything(command_line, usage) -> None:
 
 @pytest.mark.todo
 def test_get(command_line, usage) -> None:
-    NotImplementedError("test_get")
+    bool_("test_bool", True, "bool value")
+    int_("test_int", 1, "int value")
+    string("test_string", "5", "string value")
+    float_("test_float", 6.0, "float value")
+    duration("test_duration", Duration(seconds=7), "Duration value")
+
+    def visitor(f: Flag) -> None:
+        if len(f.name) > 5 and f.name[0:5] == "test_":
+            v = f.value
+            ok: bool = False
+            if f.name == "test_bool":
+                ok = v.get() == True
+            elif f.name == "test_int":
+                ok = v.get() == 1
+            elif f.name == "test_string":
+                ok = v.get() == "5"
+            elif f.name == "test_float":
+                ok = v.get() == 6.0
+            elif f.name == "test_duration":
+                ok = v.get() == Duration(seconds=7)
+            assert ok, "visit: bad value at {v.get()} for {f.name}"
+
+    visit_all(visitor)
 
 
 def _test_parse(command_line, usage) -> None:
