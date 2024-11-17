@@ -438,7 +438,7 @@ class FlagSet:
         """
         self.var(FuncValue(fn), name, usage)
 
-    def var(self, value: Value, name: str, usage: str) -> None:
+    def var[T](self, value: Value[T], name: str, usage: str) -> None:
         """
         Defines a flag with the specified name and usage string. The type and
         value of the flag are represented by the first argument, of type
@@ -853,8 +853,7 @@ def bool_func(name: str, usage: str, fn: Func) -> None:
     return command_line.bool_func(name, usage, fn)
 
 
-# TODO: generic type
-def var(value: Value, name: str, usage: str) -> None:
+def var[T](value: Value[T], name: str, usage: str) -> None:
     """
     Defines a flag with the specified name and usage string. The type and value
     of the flag are represented by the first argument, of type Value, which
