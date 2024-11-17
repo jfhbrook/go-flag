@@ -88,7 +88,55 @@ from flag.Error and must be excepted separately.
 from typing import List
 
 from flag.error import *
-from flag.flag import *
+from flag.flag import (
+    arg,
+    args,
+    bool_,
+    bool_func,
+    bool_var,
+    command_line,
+    duration,
+    duration_var,
+    ErrorHandling,
+    Flag,
+    FlagSet,
+    float_,
+    float_var,
+    Func,
+    func,
+    int_,
+    int_var,
+    lookup,
+)
+from flag.flag import (
+    parse,
+    parsed,
+    print_defaults,
+    set_,
+    string,
+    string_var,
+    unquote_usage,
+    Usage,
+    usage,
+    Value,
+    var,
+    visit,
+    visit_all,
+    Visitor,
+)
+from flag.flag import n_arg as _n_arg
+from flag.flag import n_flag as _n_flag
+
+
+def __getattr__(name: str) -> int:
+    if name == "n_flag":
+        return _n_flag()
+    elif name == "n_arg":
+        return _n_flag()
+    else:
+        raise ImportError(f"cannot import name '{name}' from 'flag' ({__file__})")
+
+
 from flag.panic import *
 from flag.pointer import *
 from flag.time import *
@@ -111,9 +159,7 @@ __all__: List[str] = [
     "unquote_usage",
     "print_defaults",
     "usage",
-    "n_flag",
     "arg",
-    "n_arg",
     "args",
     "bool_var",
     "bool_",
@@ -141,4 +187,6 @@ __all__: List[str] = [
     # flag.time
     "Duration",
     "parse_duration",
+    # properties
+    "__getattr__",
 ]

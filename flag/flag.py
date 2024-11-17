@@ -362,6 +362,7 @@ class FlagSet:
             print(f"Usage of {self.name}:\n", file=self.output)
         self.print_defaults()
 
+    @property
     def n_flag(self) -> int:
         """
         Returns the number of flags that have been set.
@@ -378,6 +379,7 @@ class FlagSet:
             return None
         return self.args[i]
 
+    @property
     def n_arg(self) -> int:
         """
         The number of arguments remaining after flags have been processed.
