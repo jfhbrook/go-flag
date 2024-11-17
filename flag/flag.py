@@ -8,11 +8,11 @@ import datetime
 from enum import Enum
 import inspect
 import sys
-from typing import Any, Callable, cast, Dict, IO, List, NoReturn, Optional, Tuple
+from typing import Any, Callable, Dict, IO, List, NoReturn, Optional, Tuple
 
 from flag.error import Error
 from flag.fmt import errorf
-from flag.panic import panic
+from flag.panic import panic, Panic
 from flag.pointer import Pointer, Ptr
 import flag.strconv as strconv
 import flag.time as time
@@ -67,6 +67,9 @@ class Value[T](ABC):
     def set(self, string: str) -> None:
         pass
 
+    def zero(self) -> str:
+        panic("can not construct zero")
+
     def __str__(self) -> str:
         return str(self.get())
 
@@ -80,6 +83,9 @@ class BoolValue(Value[bool]):
         v: bool = strconv.parse_bool(string)
         self.value.set(v)
 
+    def zero(self) -> str:
+        return "false"
+
     def __str__(self) -> str:
         return strconv.format_bool(self.get())
 
@@ -89,16 +95,25 @@ class IntValue(Value[int]):
         v: int = int(string)
         self.value.set(v)
 
+    def zero(self) -> str:
+        return "0"
+
 
 class StringValue(Value[str]):
     def set(self, string: str) -> None:
         self.value.set(string)
+
+    def zero(self) -> str:
+        return ""
 
 
 class FloatValue(Value[float]):
     def set(self, string: str) -> None:
         v: float = float(string)
         self.value.set(v)
+
+    def zero(self) -> str:
+        return "0"
 
     def __str__(self) -> str:
         return strconv.format_float(self.get())
@@ -108,6 +123,9 @@ class DurationValue(Value[datetime.timedelta]):
     def set(self, string: str) -> None:
         v: datetime.timedelta = time.parse_duration(string)
         self.value.set(v)
+
+    def zero(self) -> str:
+        return str(time.Duration())
 
 
 # NOTE: Go implements a text value type, which can use its
@@ -582,38 +600,23 @@ def is_zero_value(flag: "Flag", value: str) -> bool:
     Determines whether the string represents the zero value for a flag.
 
     In go, this function uses the reflect package to look up the type of
-    the flag's value (which is a normal value with an additional interface),
-    construct a zero value for that type, convert it to a string and compare to
-    the string value. This package is very specific to go and its data types.
+    the flag's value (which is a pointer to a normal value with an additional
+    interface), construct a "zero value" for that type (one that's
+    uninitialized), convert it to a string and compare to the value. This
+    strategy is very specific to go and its data types.
 
-    Here, we first check the instance type of flag.value (which is a subclass
-    of value). Then, for user-supplied Value instances, we attempt to construct
-    a "zero value" by calling the value's class's constructor with no
-    arguments. In cases where the value does take arguments, this will fail.
-
-    TODO: Should the Value interface include a zero() that constructs a
-    "zero value" for the underlying type?
+    Here, we require that the Value type implements a zero() method which
+    returns the string representation of a zero value.
     """
 
-    if isinstance(flag.value, BoolValue):
-        return value == "false"
-    elif isinstance(flag.value, IntValue):
-        return value == "0"
-    elif isinstance(flag.value, FloatValue):
-        return value == "0.0"
-    elif isinstance(flag.value, StringValue):
-        return value == ""
-    elif isinstance(flag.value, DurationValue):
-        return value == str(time.Duration())
-    else:
-        try:
-            return value == str(cast(Any, flag.value.__class__)())
-        except Exception as exc:
-            raise errorf(
-                "can not construct zero {t} for flag {f}",
-                t=type(flag.value.get()),
-                f=flag.name,
-            ) from exc
+    try:
+        return value == flag.value.zero()
+    except Panic as exc:
+        raise errorf(
+            "panic constructing zero {typ} for flag {name}",
+            typ=type(flag.value),
+            name=flag.name,
+        ) from exc
 
 
 def unquote_usage(flag: "Flag") -> Tuple[str, str]:
