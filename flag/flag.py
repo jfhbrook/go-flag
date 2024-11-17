@@ -517,6 +517,7 @@ class FlagSet:
                 seen: bool = self.parse_one()
                 if seen:
                     continue
+                break
             except Error as exc:
                 if self.error_handling == ErrorHandling.ContinueOnError:
                     # TODO: This is a bit of a wart...

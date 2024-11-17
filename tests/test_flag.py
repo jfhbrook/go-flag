@@ -8,6 +8,7 @@ from flag import (
     duration,
     Duration,
     Error,
+    ErrorHandling,
     Flag,
     FlagSet,
     float_,
@@ -150,3 +151,7 @@ def _test_parse(f: FlagSet) -> None:
 def test_parse(command_line, usage) -> None:
     usage.side_effect = Error.from_string("bad parse")
     _test_parse(command_line)
+
+
+def test_flag_set_parse() -> None:
+    _test_parse(FlagSet("test", ErrorHandling.ContinueOnError))
