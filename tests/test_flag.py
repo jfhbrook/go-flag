@@ -242,7 +242,8 @@ def test_parse_error() -> None:
 # error analogous to a range error.
 
 
-# In go's test suite, this calls a subprocess - yikes!
+# In go's test suite, this calls a subprocess - yikes! In my case, I will
+# probably create an alias to sys.exit in the module and patch it.
 @pytest.mark.skip
 def test_exit_code() -> None:
     pass
