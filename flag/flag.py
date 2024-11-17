@@ -298,9 +298,6 @@ class FlagSet:
             #
             # This edge case may not be relevant to Python, but nevertheless
             # we retain the behavior - for now.
-
-            # TODO: Is this inspecting enough frames out of the stack? Go
-            # doesn't have a try/except context to contend with.
             info = inspect.stack()[2]
             self._undef[name] = f"{info.filename}:{info.lineno}"
 
