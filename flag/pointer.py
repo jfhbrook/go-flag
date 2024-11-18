@@ -10,7 +10,7 @@ class Pointer[V](Protocol):
     function which mutates its value.
     """
 
-    def set(self, value: V) -> None:
+    def set_(self, value: V) -> None:
         """
         Set the value at a pointer.
         """
@@ -50,7 +50,7 @@ class Ptr[V](Pointer):
     ```py
     value = False
     p = Ptr(value)
-    p.set(True)
+    p.set_(True)
 
     # This will fail!
     assert value
@@ -65,7 +65,7 @@ class Ptr[V](Pointer):
     def __init__(self, value: Optional[V] = None) -> None:
         self.value = value
 
-    def set(self, value: V) -> None:
+    def set_(self, value: V) -> None:
         """
         Set the value at a pointer.
         """
@@ -118,7 +118,7 @@ class AttrRef[V](Pointer):
         self.obj = obj
         self.name = name
 
-    def set(self, value: V) -> None:
+    def set_(self, value: V) -> None:
         """
         Set the value of the attribute.
         """
@@ -179,7 +179,7 @@ class KeyRef[V](Pointer):
         self.dict = dict_
         self.key = key
 
-    def set(self, value: V) -> None:
+    def set_(self, value: V) -> None:
         """
         Set the value at the key.
         """

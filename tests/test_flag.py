@@ -161,7 +161,7 @@ class ListValue(Value[List[str]]):
     def __init__(self) -> None:
         self.value = Ptr([])
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         self.get().append(string)
 
     def __str__(self) -> str:
@@ -263,5 +263,5 @@ def test_user_defined_bool_func() -> None:
 
 
 @pytest.mark.skip
-def test_define_after_set() -> None:
+def test_define_after_set_() -> None:
     pass

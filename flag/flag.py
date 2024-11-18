@@ -32,7 +32,7 @@ def set_value(self: "Value", value: str) -> None:
     Set a value, reifying ValueErrors into flag Errors.
     """
     try:
-        self.set(value)
+        self.set_(value)
     except ValueError as exc:
         raise ParseError from exc
 
@@ -46,7 +46,7 @@ class Value[T](ABC):
     """
 
     def __init__(self, value: T, p: Pointer[T] = Ptr()) -> None:
-        p.set(value)
+        p.set_(value)
         self.value: Pointer[T] = p
 
     def get(self) -> T:
@@ -57,7 +57,7 @@ class Value[T](ABC):
         return self.value.deref()
 
     @abstractmethod
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         """
         set is called once, in command line order, for each flag present.
         """
@@ -107,9 +107,9 @@ class BoolValue(Value[bool]):
     A boolean value.
     """
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         v: bool = strconv.parse_bool(string)
-        self.value.set(v)
+        self.value.set_(v)
 
     def zero_str(self) -> str:
         return "false"
@@ -127,9 +127,9 @@ class IntValue(Value[int]):
     An int value.
     """
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         v: int = int(string)
-        self.value.set(v)
+        self.value.set_(v)
 
     def zero_str(self) -> str:
         return "0"
@@ -140,8 +140,8 @@ class StringValue(Value[str]):
     A string value.
     """
 
-    def set(self, string: str) -> None:
-        self.value.set(string)
+    def set_(self, string: str) -> None:
+        self.value.set_(string)
 
     def zero_str(self) -> str:
         return ""
@@ -152,9 +152,9 @@ class FloatValue(Value[float]):
     A float value.
     """
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         v: float = float(string)
-        self.value.set(v)
+        self.value.set_(v)
 
     def zero_str(self) -> str:
         return "0"
@@ -173,9 +173,9 @@ class DurationValue(Value[datetime.timedelta]):
     on the result.
     """
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         v: datetime.timedelta = time.parse_duration(string)
-        self.value.set(v)
+        self.value.set_(v)
 
     def zero_str(self) -> str:
         return str(time.Duration())
@@ -192,7 +192,7 @@ class FuncValue(Value[Func]):
         # In go, functions are treated as pointers
         self.value = Ptr(value)
 
-    def set(self, string: str) -> None:
+    def set_(self, string: str) -> None:
         fn = self.get()
         fn(string)
 
@@ -282,9 +282,9 @@ class FlagSet:
         # the same number of layers whether we're calling the method on
         # FlagSet or the global set_ function. It's extremely dastardly,
         # and surprisingly the go source doesn't document it.
-        return self._set(name, value)
+        return self._set_(name, value)
 
-    def _set(self, name: str, value: str) -> None:
+    def _set_(self, name: str, value: str) -> None:
         try:
             flag = self._formal[name]
         except KeyError:
@@ -695,7 +695,7 @@ def set_(name: str, value: str) -> None:
     Sets the value of the named command-line flag.
     """
 
-    command_line._set(name, value)
+    command_line._set_(name, value)
 
 
 def is_zero_value(flag: "Flag", value: str) -> bool:
