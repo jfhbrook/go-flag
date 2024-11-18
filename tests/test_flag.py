@@ -14,6 +14,7 @@ from flag import (
     float_,
     func,
     int_,
+    ParseError,
     Ptr,
     set_,
     string,
@@ -231,8 +232,18 @@ def test_getters() -> None:
 
 
 @pytest.mark.skip
-def test_parse_error() -> None:
-    pass
+def test_parse_error(output) -> None:
+    for type_ in ["bool", "int", "float", "duration"]:
+        fs = FlagSet("parse error test", ErrorHandling.RAISE)
+        fs.output = output
+        fs.bool_("bool", False, "")
+        fs.int_("int", 0, "")
+        fs.float_("float", 0.0, "")
+        fs.duration("duration", Duration(), "")
+        # Strings cannot give errors.
+        args = [f"-{type_}=x"]
+        with pytest.raises(ParseError):
+            fs.parse(args)
 
 
 # As far as I can tell, Python's ints aren't sensitive to under/overflow - I

@@ -110,6 +110,7 @@ from flag.flag import (  # noqa F401
     lookup,
 )
 from flag.flag import (  # noqa F401
+    ParseError,
     print_defaults,
     set_,
     string,
