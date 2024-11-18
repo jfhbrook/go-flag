@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any, cast, Dict, Optional
 
 from flag.panic import panic
@@ -11,30 +11,34 @@ class Pointer[V](ABC):
     function which mutates its value.
     """
 
+    @abstractmethod
     def set_(self, value: V) -> None:
         """
         Set the value at a pointer.
         """
-        ...
+        pass
 
+    @abstractmethod
     def deref(self) -> V:
         """
         Dereference the pointer, getting its underlying value.
         """
-        ...
+        pass
 
+    @abstractmethod
     def is_nil(self) -> bool:
         """
         Whether or not the pointer is nil. If the pointer is nil, then
         dereferencing it will cause a panic.
         """
-        ...
+        pass
 
+    @abstractmethod
     def __getattr__(self, name: str) -> Any:
         """
         Get an attribute from the underlying value.
         """
-        ...
+        pass
 
     def __rrshift__(self, *args, **kwargs) -> Any:
         return self.__getattr__("__rrshift__")(*args, **kwargs)
