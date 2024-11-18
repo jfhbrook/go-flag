@@ -1,12 +1,12 @@
-import datetime
-from typing import Any, Callable, cast, Dict, Optional, Protocol
+from abc import ABC
+from typing import Any, cast, Dict, Optional
 
 from flag.panic import panic
 
 
-class Pointer[V](Protocol):
+class Pointer[V](ABC):
     """
-    A pointer. Go has pointers, Python does not. This protocol assists in
+    A pointer. Go has pointers, Python does not. This class assists in
     use cases involving pointers, such as in passing a reference to a
     function which mutates its value.
     """
@@ -36,6 +36,134 @@ class Pointer[V](Protocol):
         """
         ...
 
+    def __rrshift__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rrshift__")(*args, **kwargs)
+
+    def __radd__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__radd__")(*args, **kwargs)
+
+    def __rtruediv__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rtruediv__")(*args, **kwargs)
+
+    def __neg__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__neg__")(*args, **kwargs)
+
+    def __mod__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__mod__")(*args, **kwargs)
+
+    def __eq__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__eq__")(*args, **kwargs)
+
+    def __ror__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__ror__")(*args, **kwargs)
+
+    def __invert__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__invert__")(*args, **kwargs)
+
+    def __rfloordiv__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rfloordiv__")(*args, **kwargs)
+
+    def __le__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__le__")(*args, **kwargs)
+
+    def __sub__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__sub__")(*args, **kwargs)
+
+    def __rdivmod__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rdivmod__")(*args, **kwargs)
+
+    def __lshift__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__lshift__")(*args, **kwargs)
+
+    def __floor__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__floor__")(*args, **kwargs)
+
+    def __rshift__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rshift__")(*args, **kwargs)
+
+    def __floordiv__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__floordiv__")(*args, **kwargs)
+
+    def __pow__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__pow__")(*args, **kwargs)
+
+    def __ceil__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__ceil__")(*args, **kwargs)
+
+    def __add__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__add__")(*args, **kwargs)
+
+    def __and__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__and__")(*args, **kwargs)
+
+    def __bool__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__bool__")(*args, **kwargs)
+
+    def __rmod__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rmod__")(*args, **kwargs)
+
+    def __divmod__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__divmod__")(*args, **kwargs)
+
+    def __rlshift__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rlshift__")(*args, **kwargs)
+
+    def __abs__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__abs__")(*args, **kwargs)
+
+    def __rsub__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rsub__")(*args, **kwargs)
+
+    def __ne__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__ne__")(*args, **kwargs)
+
+    def __rxor__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rxor__")(*args, **kwargs)
+
+    def __lt__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__lt__")(*args, **kwargs)
+
+    def __ge__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__ge__")(*args, **kwargs)
+
+    def __int__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__int__")(*args, **kwargs)
+
+    def __rand__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rand__")(*args, **kwargs)
+
+    def __round__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__round__")(*args, **kwargs)
+
+    def __gt__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__gt__")(*args, **kwargs)
+
+    def __or__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__or__")(*args, **kwargs)
+
+    def __float__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__float__")(*args, **kwargs)
+
+    def __xor__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__xor__")(*args, **kwargs)
+
+    def __rpow__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rpow__")(*args, **kwargs)
+
+    def __trunc__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__trunc__")(*args, **kwargs)
+
+    def __truediv__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__truediv__")(*args, **kwargs)
+
+    def __mul__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__mul__")(*args, **kwargs)
+
+    def __rmul__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__rmul__")(*args, **kwargs)
+
+    def __hash__(self, *args, **kwargs) -> Any:
+        return self.__getattr__("__hash__")(*args, **kwargs)
 
 
 class Ptr[V](Pointer):
@@ -193,15 +321,14 @@ class KeyRef[V](Pointer):
     key: Any
 
     def __init__(self, dict_: Dict[Any, Any], key: Any) -> None:
-        self.dict = dict_
+        self.dict_ = dict_
         self.key = key
-        _magic(self, lambda: getattr(self.dict, self.key, None))
 
     def set_(self, value: V) -> None:
         """
         Set the value at the key.
         """
-        self.dict[self.key] = value
+        self.dict_[self.key] = value
 
     def deref(self) -> V:
         """
@@ -218,12 +345,11 @@ class KeyRef[V](Pointer):
         return self.dict_.get(self.key, None) is None
 
     def __str__(self) -> str:
-        return str(self.dict_.get(self.name, None))
+        return str(self.dict_.get(self.key, None))
 
     def __repr__(self) -> str:
         return f"KeyRef({self.key}={self.dict_.get(self.key, None)})"
 
     def __getattr__(self, name: str) -> Any:
-        return getattr(self.dict_[self.key], name)
-
-
+        value = self.dict_[self.key]
+        return getattr(value, name)
