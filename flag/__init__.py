@@ -123,11 +123,11 @@ from flag.flag import (  # noqa F401
     visit_all,
     Visitor,
 )
-from flag.flag import n_arg as _n_arg  # noqa F401
-from flag.flag import n_flag as _n_flag  # noqa F401
+from flag.flag import n_arg as _n_arg
+from flag.flag import n_flag as _n_flag
 from flag.flag import parse  # noqa F401
-from flag.flag import parsed as _parsed  # noqa F401
-from flag.panic import Panic  # noqa F401
+from flag.flag import parsed as _parsed
+from flag.panic import panic, Panic  # noqa F401
 from flag.pointer import AttrRef, KeyRef, Pointer, Ptr  # noqa F401
 from flag.time import Duration, parse_duration  # noqa F401
 import flag.zero as zero  # noqa F401

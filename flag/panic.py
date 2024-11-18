@@ -6,7 +6,8 @@ class Panic(Exception):
     Panic!
     """
 
-    pass
+    def __init__(self, message: str) -> None:
+        super().__init__(f"panic: {message}")
 
 
 def panic(message: str, exc: Optional[Exception] = None) -> NoReturn:
