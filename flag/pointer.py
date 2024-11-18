@@ -90,7 +90,11 @@ def _magic[T](p: Pointer[T], value: Optional[T]) -> None:
     """
 
     cls = p.__class__
-    cls_methods = {method for method in dir(cls) if not method.startswith("_")}
+    cls_methods = {
+        method
+        for method in dir(cls)
+        if not method.startswith("__") and not method.endswith("__")
+    }
 
     if value is None:
         methods = DEFAULTS
