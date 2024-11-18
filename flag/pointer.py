@@ -1,6 +1,59 @@
+import datetime
 from typing import Any, cast, Dict, Optional, Protocol
 
 from flag.panic import panic
+
+# Methods that I KNOW would be dangerous to proxy/overwrite
+FORBIDDEN = {
+    "__abstractmethods__",
+    "__annotations__",
+    "__callable_proto_members_only__",
+    "__class__",
+    "__class_getitem__",
+    "__delattr__",
+    "__dict__",
+    "__dir__",
+    "__doc__",
+    "__format__",
+    "__getattribute__",
+    "__getnewargs__",
+    "__getstate__",
+    "__init__",
+    "__init_subclass__",
+    "__module__",
+    "__new__",
+    "__orig_bases__",
+    "__parameters__",
+    "__pos__",
+    "__protocol_attrs__",
+    "__reduce__",
+    "__reduce_ex__",
+    "__repr__",
+    "__setattr__",
+    "__sizeof__",
+    "__slots__",
+    "__str__",
+    "__subclasshook__",
+    "__trunc__",
+    "__type_params__",
+    "__weakref__",
+    "_abc_impl",
+    "_is_protocol",
+    "_is_runtime_protocol",
+}
+
+# Default methods to attach
+DEFAULTS = {
+    method
+    for method in (
+        set(dir(False))
+        | set(dir(0))
+        | set(dir(""))
+        | set(dir(0.0))
+        | set(dir(datetime.timedelta()))
+    )
+    if method not in FORBIDDEN
+}
 
 
 class Pointer[V](Protocol):
@@ -28,6 +81,27 @@ class Pointer[V](Protocol):
         dereferencing it will cause a panic.
         """
         ...
+
+
+def _magic[T](p: Pointer[T], value: Optional[T]) -> None:
+    """
+    Proxy methods from the pointer to the underlying value. Extreme
+    shenanigans afoot!
+    """
+
+    cls = p.__class__
+    cls_methods = {method for method in dir(cls) if not method.startswith("_")}
+
+    if value is None:
+        methods = DEFAULTS
+    else:
+        methods = dir(value)
+    for method in methods:
+        if method in cls_methods or method in FORBIDDEN:
+            continue
+        setattr(
+            p, method, lambda *args, **kwargs: getattr(value, method)(*args, **kwargs)
+        )
 
 
 class Ptr[V](Pointer):
@@ -64,6 +138,7 @@ class Ptr[V](Pointer):
 
     def __init__(self, value: Optional[V] = None) -> None:
         self.value = value
+        _magic(self, self.value)
 
     def set_(self, value: V) -> None:
         """
@@ -117,6 +192,8 @@ class AttrRef[V](Pointer):
     def __init__(self, obj: object, name: str) -> None:
         self.obj = obj
         self.name = name
+
+        _magic(self, getattr(self.obj, self.name, None))
 
     def set_(self, value: V) -> None:
         """
@@ -178,6 +255,7 @@ class KeyRef[V](Pointer):
     def __init__(self, dict_: Dict[Any, Any], key: Any) -> None:
         self.dict = dict_
         self.key = key
+        _magic(self, getattr(self.dict, self.key, None))
 
     def set_(self, value: V) -> None:
         """
