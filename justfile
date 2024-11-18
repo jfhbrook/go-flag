@@ -76,7 +76,7 @@ build-docs:
 
 # Build the package
 build:
-  uv run build
+  uv build
 
 _clean-build:
   rm -rf dist
