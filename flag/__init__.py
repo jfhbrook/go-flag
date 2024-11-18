@@ -85,10 +85,10 @@ this library should be instances of flag.Error. flag.Panic does not inherit
 from flag.Error and must be excepted separately.
 """
 
-from typing import Any, List
+from typing import Any
 
-from flag.error import Error
-from flag.flag import (
+from flag.error import Error  # noqa F401
+from flag.flag import (  # noqa F401
     arg,
     args,
     bool_,
@@ -109,7 +109,7 @@ from flag.flag import (
     int_var,
     lookup,
 )
-from flag.flag import (
+from flag.flag import (  # noqa F401
     print_defaults,
     set_,
     string,
@@ -123,14 +123,14 @@ from flag.flag import (
     visit_all,
     Visitor,
 )
-from flag.flag import n_arg as _n_arg
-from flag.flag import n_flag as _n_flag
-from flag.flag import parse
-from flag.flag import parsed as _parsed
-from flag.panic import Panic
-from flag.pointer import AttrRef, KeyRef, Pointer, Ptr
-from flag.time import Duration, parse_duration
-import flag.zero as zero
+from flag.flag import n_arg as _n_arg  # noqa F401
+from flag.flag import n_flag as _n_flag  # noqa F401
+from flag.flag import parse  # noqa F401
+from flag.flag import parsed as _parsed  # noqa F401
+from flag.panic import Panic  # noqa F401
+from flag.pointer import AttrRef, KeyRef, Pointer, Ptr  # noqa F401
+from flag.time import Duration, parse_duration  # noqa F401
+import flag.zero as zero  # noqa F401
 
 
 def __getattr__(name: str) -> Any:
@@ -142,56 +142,3 @@ def __getattr__(name: str) -> Any:
         return _parsed()
     else:
         raise ImportError(f"cannot import name '{name}' from 'flag' ({__file__})")
-
-
-__all__: List[str] = [
-    # flag.error
-    "Error",
-    # flag.flag
-    "Func",
-    "Visitor",
-    "Usage",
-    "Value",
-    "ErrorHandling",
-    "FlagSet",
-    "Flag",
-    "HelpError",
-    "visit_all",
-    "visit",
-    "lookup",
-    "set_",
-    "unquote_usage",
-    "print_defaults",
-    "usage",
-    "arg",
-    "args",
-    "bool_var",
-    "bool_",
-    "int_var",
-    "int_",
-    "string_var",
-    "string",
-    "float_var",
-    "float_",
-    "duration_var",
-    "duration",
-    "func",
-    "bool_func",
-    "var",
-    "parse",
-    "command_line",
-    # flag.panic
-    "Panic",
-    # flag.pointer
-    "AttrRef",
-    "KeyRef",
-    "Pointer",
-    "Ptr",
-    # flag.time
-    "Duration",
-    "parse_duration",
-    # flag.zero
-    "zero",
-    # properties
-    "__getattr__",
-]
