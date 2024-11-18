@@ -95,10 +95,10 @@ count = flag.AttrRef(Config, "count")
 name = flag.AttrRef(Config, "name")
 threshold = flag.AttrRef(Config, "threshold")
 
-flag.bool_var(force, "force", False, "bool value")
-flag.int_var(count, "count", 1, "int value")
-flag.string_var(name, "name", "Josh", "string value")
-flag.float_var(threshold, "threshold", 1.0, "float value")
+flag.bool_var(force, "force", False, "force the command to execute")
+flag.int_var(count, "count", 1, "a count")
+flag.string_var(name, "name", "Josh", "a name")
+flag.float_var(threshold, "threshold", 1.0, "a threshold")
 
 flag.parse()
 
