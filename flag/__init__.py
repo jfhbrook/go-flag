@@ -85,7 +85,7 @@ this library should be instances of flag.Error. flag.Panic does not inherit
 from flag.Error and must be excepted separately.
 """
 
-from typing import List
+from typing import Any, List
 
 from flag.error import Error
 from flag.flag import (
@@ -109,8 +109,6 @@ from flag.flag import (
     lookup,
 )
 from flag.flag import (
-    parse,
-    parsed,
     print_defaults,
     set_,
     string,
@@ -126,17 +124,21 @@ from flag.flag import (
 )
 from flag.flag import n_arg as _n_arg
 from flag.flag import n_flag as _n_flag
+from flag.flag import parse
+from flag.flag import parsed as _parsed
 from flag.panic import Panic
 from flag.pointer import AttrRef, KeyRef, Pointer, Ptr
 from flag.time import Duration, parse_duration
 import flag.zero as zero
 
 
-def __getattr__(name: str) -> int:
+def __getattr__(name: str) -> Any:
     if name == "n_flag":
         return _n_flag()
     elif name == "n_arg":
         return _n_arg()
+    elif name == "parsed":
+        return _parsed()
     else:
         raise ImportError(f"cannot import name '{name}' from 'flag' ({__file__})")
 
@@ -175,7 +177,6 @@ __all__: List[str] = [
     "bool_func",
     "var",
     "parse",
-    "parsed",
     "command_line",
     # flag.panic
     "Panic",

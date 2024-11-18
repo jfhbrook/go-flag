@@ -988,7 +988,7 @@ def parsed() -> bool:
     """
     Whether the command-line flags have been parsed.
     """
-    raise NotImplementedError("parsed")
+    return command_line.parsed
 
 
 # In go, they account for the possibility of os.Args being empty. But in
