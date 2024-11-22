@@ -38,8 +38,8 @@ using the flags themselves, they're instances of flag.Ptr; if you bind to
 variables, they may be of any implementation of flag.Pointer, including
 flag.AttrRef and flag.KeyRef. For more details, check the relevant docstrings.
 
-After parsing, the arguments following the flags are available by calling
-flag.args() or individually as flag.arg(i). The arguments are zero-indexed.
+After parsing, the arguments following the flags are available via
+flag.args or individually as flag.arg(i). The arguments are zero-indexed.
 
 # Command line flag syntax
 
@@ -89,8 +89,6 @@ from typing import Any
 
 from flag.error import Error  # noqa F401
 from flag.flag import (  # noqa F401
-    arg,
-    args,
     bool_,
     bool_func,
     bool_var,
@@ -124,6 +122,8 @@ from flag.flag import (  # noqa F401
     visit_all,
     Visitor,
 )
+from flag.flag import arg  # noqa F401
+from flag.flag import args as _args
 from flag.flag import n_arg as _n_arg
 from flag.flag import n_flag as _n_flag
 from flag.flag import parse  # noqa F401
@@ -135,7 +135,9 @@ import flag.zero as zero  # noqa F401
 
 
 def __getattr__(name: str) -> Any:
-    if name == "n_flag":
+    if name == "args":
+        return _args()
+    elif name == "n_flag":
         return _n_flag()
     elif name == "n_arg":
         return _n_arg()
