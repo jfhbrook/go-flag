@@ -1,3 +1,6 @@
+import subprocess
+import sys
+import textwrap
 from typing import Any, Dict, List
 
 import pytest
@@ -251,11 +254,46 @@ def test_parse_error(output) -> None:
 # error analogous to a range error.
 
 
-# In go's test suite, this calls a subprocess - yikes! In my case, I will
-# probably create an alias to sys.exit in the module and patch it.
-@pytest.mark.skip
-def test_exit_code() -> None:
-    pass
+@pytest.mark.parametrize(
+    "flag,handle,expect",
+    [
+        ("-h", None, 0),
+        ("-help", None, 0),
+        ("-undefined", None, 2),
+        ("-h", "h", 123),
+        ("-help", "help", 123),
+    ],
+)
+def test_exit_code(flag, handle, expect) -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            textwrap.dedent(
+                """
+            import os
+            import sys
+
+            import flag
+
+            FLAG=os.environ.get("FLAG", "")
+            HANDLE=os.environ.get("HANDLE", "")
+
+            if FLAG != "":
+                fs = flag.FlagSet("test", flag.ErrorHandling.EXIT)
+                if HANDLE != "":
+                    b = flag.Ptr()
+                    fs.bool_var(b, HANDLE, False, "")
+
+                fs.parse([FLAG])
+                sys.exit(123)
+            """
+            ),
+        ],
+        env=dict(FLAG=flag if flag else "", HANDLE=handle if handle else ""),
+    )
+
+    assert proc.returncode == expect
 
 
 @pytest.mark.skip
